@@ -24,11 +24,11 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.util.OntologyFactory;
 
 public class Ontology {
-	
+
 	public static void extractOntology(String path, String ontologyName){
-		
-	   OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			
+
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
 		File file = new File(path);
 		OWLOntology o;
 		try {
@@ -41,42 +41,43 @@ public class Ontology {
 
 			e.printStackTrace();
 		} 
-		
-		
+
+
 	}
 
 	private static void importOntology(OWLOntology ontology, String ontologyName) throws Exception {
 
-	    //OWLReasonerFactory reasonerFactory = new JFactFactory();
-	    //OWLReasonerConfiguration config = new SimpleConfiguration(50000);    
+		//OWLReasonerFactory reasonerFactory = new JFactFactory();
+		//OWLReasonerConfiguration config = new SimpleConfiguration(50000);    
 		//OWLReasoner reasoner = reasonerFactory.createReasoner(ontology,config);
 		OWLReasonerFactory reasonerFactory = new StructuralReasonerFactory();
-	    OWLReasoner reasoner = reasonerFactory.createReasoner(ontology);
+		OWLReasoner reasoner = reasonerFactory.createReasoner(ontology);
 
 		if (!reasoner.isConsistent()) {
 			// logger.error("Ontology is inconsistent");
 			// throw your exception of choice here
 			throw new Exception("Ontology is inconsistent");
 		}
-		
+
 		Node thingNode = null;
 		try (Transaction tx = Manager.instance().createNewTransaction()) {
 
 			thingNode = getOrCreateNodeWithUniqueFactory("owl:" + ontologyName, ontologyName );
 			tx.success();
 		}
-			long counter = 0;
-			long classSize = ontology.getClassesInSignature().size();
-			System.out.println("The ontology contains " + ontology.getLogicalAxiomCount() 
-					+ " axioms, "+ classSize + " classes, and "
-					+ ontology.getObjectPropertiesInSignature().size()+ " properties");
-			System.out.print("Processed:  " + ++counter);
-			for (OWLClass c : ontology.getClassesInSignature()) {//ontology.getClassesInSignature(true)
-				if ((counter % 50) == 0)System.out.println("..." + counter + " of " + classSize);
-				counter++;
-				
-				try (Transaction tx = Manager.instance().createNewTransaction()) {
-			
+		
+		long counter = 0;
+		long classSize = ontology.getClassesInSignature().size();
+		System.out.println("The ontology contains " + ontology.getLogicalAxiomCount() 
+				+ " axioms, "+ classSize + " classes, and "
+				+ ontology.getObjectPropertiesInSignature().size()+ " properties");
+		System.out.print("Processed:  " + ++counter);
+		for (OWLClass c : ontology.getClassesInSignature()) {//ontology.getClassesInSignature(true)
+			if ((counter % 50) == 0)System.out.println("..." + counter + " of " + classSize);
+			counter++;
+
+			try (Transaction tx = Manager.instance().createNewTransaction()) {
+
 				String classString = c.toString();
 				if (classString.contains("#")) {
 					classString = classString.substring(
@@ -158,18 +159,18 @@ public class Ontology {
 						}
 					}
 				}
-				
+
 				tx.success();	
 			}
-			
+
 		}
 		System.out.println("...done");
 	}
 
-    public static Node getOrCreateNodeWithUniqueFactory(String idValue, String ontologyName)
-    {
-             
-        return OntologyFactory.getFactory(ontologyName).getOrCreate( "id", idValue );
-    }
-	
+	public static Node getOrCreateNodeWithUniqueFactory(String idValue, String ontologyName)
+	{
+
+		return OntologyFactory.getFactory(ontologyName).getOrCreate( "id", idValue );
+	}
+
 }
