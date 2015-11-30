@@ -55,11 +55,6 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.7.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.jlibsedml</groupId>
-			<artifactId>jlibsedml</artifactId>
-			<version>2.0.0</version>
-		</dependency>
 		<!-- <dependency> <groupId>com.io7m.xom</groupId> <artifactId>xom</artifactId> 
 			<version>1.2.10</version> </dependency> -->
 		<dependency>
