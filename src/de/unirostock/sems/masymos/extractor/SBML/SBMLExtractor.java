@@ -161,9 +161,13 @@ public class SBMLExtractor extends Extractor{
 		}
 		
 		//store and index non RDF 
-		if (annotation.getNonRDFannotation() != null){
-			annotationNode.setProperty(Property.General.NONRDF, annotation.getNonRDFannotation());
-			annotationIndex.add(annotationNode, Property.General.NONRDF, annotation.getNonRDFannotation());
+		if (annotation.getNonRDFannotation() != null){			
+			try {
+				annotationNode.setProperty(Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
+				annotationIndex.add(annotationNode, Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
+			} catch (XMLStreamException e) {
+				// TODO Auto-generated catch block
+			}
 		}
 		
 		//get list of controlled vocabulary terms
