@@ -15,6 +15,7 @@ import org.neo4j.helpers.collection.MapUtil;
 
 import de.unirostock.sems.masymos.analyzer.AnnotationIndexAnalyzer;
 import de.unirostock.sems.masymos.annotation.AnnotationResolverUtil;
+import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.configuration.Relation;
 import de.unirostock.sems.masymos.extractor.Extractor;
@@ -31,18 +32,31 @@ public class ModelInserter {
 		Node documentNode = null;
 		try {
 			documentNode = Extractor.extractStoreIndex(XMLdoc, modelType, versionId);
-
+		} catch (Exception e) {
+			e.printStackTrace();
+			documentNode = null;
+		}
+		
+		try ( Transaction tx = graphDB.beginTx() ) {
+			if( documentNode == null ) {
+				documentNode = graphDB.createNode();
+				documentNode.addLabel(NodeLabel.Types.DOCUMENT);
+			}
+			
 			Map<String, String> propertyMap = new HashMap<String, String>();
-
+	
 			propertyMap.put(Property.General.META, meta);
 			propertyMap.put(Property.General.XMLDOC, XMLdoc.toString());
 			propertyMap.put(Property.General.URI, XMLdoc.toString());
 			propertyMap.put(Property.General.FILEID, fileID);
 			Extractor.setExternalDocumentInformation(documentNode, propertyMap);
 			
+			tx.success();
 		} catch (Exception e) {
-			documentNode = null;
+			e.printStackTrace();
 		}
+			
+		
 		if (documentNode == null)
 			return false;
 
