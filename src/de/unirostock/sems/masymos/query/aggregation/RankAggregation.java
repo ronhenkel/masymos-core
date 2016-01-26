@@ -13,7 +13,16 @@ public class RankAggregation {
 	
 	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker, AggregationType type){
 		
-		//todo case by enum
+		switch(type){
+		case adj: 
+			return adj(rankersList, aggregateRanker);
+		case combMNZ: 
+			return combMNZ(rankersList, aggregateRanker);
+		case localKemenization: 
+			return localKemenization(rankersList, aggregateRanker);
+		case supervisedLocalKemenization: 
+			return supervisedLocalKemenization(rankersList, aggregateRanker);
+		}
 		
 		return null;
 	}
@@ -45,7 +54,6 @@ public class RankAggregation {
 		double ranking2OfObject2;
 		ModelResultSet object1;
 		ModelResultSet object2;
-		int c = 0;
 		
 		for(int i = 0; i < Math.min(k, ranker_1.size()); i++)
 			for(int j = 0; j <  Math.min(k, ranker_2.size()); j++){
