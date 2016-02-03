@@ -12,6 +12,7 @@ public class RankAggregation {
 		
 	
 	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker, RankAggregationType.Types type){
+
 		
 		if (aggregateRanker.isEmpty()) return aggregateRanker;
 		
