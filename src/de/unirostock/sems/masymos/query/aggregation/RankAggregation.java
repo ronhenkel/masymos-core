@@ -5,17 +5,31 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.unirostock.sems.masymos.configuration.RankAggregationType;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 
 public class RankAggregation {
-	
-	public static enum AggregationType{adj, combMNZ, localKemenization, supervisedLocalKemenization};
-	
-	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker, AggregationType type){
 		
-		//todo case by enum
+	
+	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker, RankAggregationType.Types type){
 		
-		return null;
+		if (aggregateRanker.isEmpty()) return aggregateRanker;
+		
+		switch(type){ 
+			
+		case ADJACENT_PAIRS: 
+			return adj(rankersList, aggregateRanker); 
+		case COMB_MNZ:
+			return combMNZ(rankersList, aggregateRanker);
+		case LOCAL_KEMENIZATION:
+			return localKemenization(rankersList, aggregateRanker);
+		case SUPERVISED_LOCAL_KEMENIZATION: 
+			return supervisedLocalKemenization(rankersList, aggregateRanker);
+		case DEFAULT: 
+			return aggregateRanker;
+		default: 
+			return aggregateRanker;
+		}
 	}
 	
 	
@@ -45,7 +59,6 @@ public class RankAggregation {
 		double ranking2OfObject2;
 		ModelResultSet object1;
 		ModelResultSet object2;
-		int c = 0;
 		
 		for(int i = 0; i < Math.min(k, ranker_1.size()); i++)
 			for(int j = 0; j <  Math.min(k, ranker_2.size()); j++){
