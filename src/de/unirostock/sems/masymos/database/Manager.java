@@ -1,6 +1,7 @@
 package de.unirostock.sems.masymos.database;
 
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ public class Manager {
 	private Index<Node> personIndex = null;
 	private Index<Node> constituentIndex = null;
 	private Index<Node> sedmlIndex = null;
-	private ReadableIndex<Node> autoNodeIndex = null;
+//	private ReadableIndex<Node> autoNodeIndex = null;
 	
 	private Map<String, ReadableIndex<?>> indexMap = null; 
 
@@ -50,7 +51,7 @@ public class Manager {
 	private void initializeManager(String path, Boolean isEmbedded) {
 		//if (isEmbedded) {
 			graphDb = new GraphDatabaseFactory().
-				    newEmbeddedDatabaseBuilder( path ).
+				    newEmbeddedDatabaseBuilder( new File(path) ).
 				    //setConfig( GraphDatabaseSettings.node_keys_indexable, Property.General.NODETYPE).
 				    //setConfig( GraphDatabaseSettings.node_auto_indexing, "true" ).			    
 				    newGraphDatabase();	
@@ -96,7 +97,7 @@ public class Manager {
 			publicationIndex = graphDb.index().forNodes("publicationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", PublicationIndexAnalyzer.class.getName()));
 			personIndex = graphDb.index().forNodes("personIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", PersonIndexAnalyzer.class.getName()));
 			sedmlIndex = graphDb.index().forNodes("sedmlIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", SedmlndexAnalyzer.class.getName()));
-			autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
+//			autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
 			
 			//((LuceneIndex<Node>) modelIndex).setCacheCapacity( Property.General.NAME, 3000 );
 			//((LuceneIndex<Node>) modelIndex).setCacheCapacity( Property.General.ID, 3000 );
@@ -117,7 +118,7 @@ public class Manager {
 		indexMap.put("publicationIndex", publicationIndex);
 		indexMap.put("personIndex", personIndex);
 		indexMap.put("sedmlIndex", sedmlIndex);
-		indexMap.put("autoNodeIndex", autoNodeIndex);
+//		indexMap.put("autoNodeIndex", autoNodeIndex);
 	}
 	
 
@@ -173,9 +174,9 @@ public class Manager {
 		return sedmlIndex;
 	}
 
-	public ReadableIndex<Node> getAutoNodeIndex() {
-		return autoNodeIndex;
-	}
+//	public ReadableIndex<Node> getAutoNodeIndex() {
+//		return autoNodeIndex;
+//	}
 
 
 	public Object clone() throws CloneNotSupportedException {
