@@ -20,7 +20,7 @@ public class ModelIndexAnalyzer extends Analyzer{
 		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
 		map.put(Property.General.URI, new LowerCaseKeywordAnalyzer());		
 		map.put(Property.General.ID, new LowerCaseKeywordAnalyzer());	
-		return new PerFieldAnalyzerWrapper(new SimpleAnalyzer(Version.LUCENE_35), map);
+		return new PerFieldAnalyzerWrapper(new SimpleAnalyzer(Version.LUCENE_36), map);
 		//return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_35), map);
 	}
 	

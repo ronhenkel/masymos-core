@@ -22,7 +22,7 @@ public class SedmlndexAnalyzer extends Analyzer{
 		Map<String, Analyzer> analyzers = new HashMap<String, Analyzer>();
 		analyzers.put(Property.General.URI, new KeywordAnalyzer());	
 		//analyzers.put(Property.SEDML.MODELSOURCE, new KeywordAnalyzer());	
-		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_31), analyzers);
+		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_36), analyzers);
 	}
 	
 	@Override

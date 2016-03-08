@@ -20,7 +20,7 @@ public class PersonIndexAnalyzer extends Analyzer{
 		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
 		map.put(Property.Person.FAMILYNAME, new LowerCaseKeywordAnalyzer());
 		map.put(Property.Person.GIVENNAME, new LowerCaseKeywordAnalyzer());
-		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_35), map);
+		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_36), map);
 	}
 	
 

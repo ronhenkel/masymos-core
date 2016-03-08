@@ -20,7 +20,7 @@ public class AnnotationIndexAnalyzer extends Analyzer{
 	private final static PerFieldAnalyzerWrapper createAnnotationIndexAnalyzer() {
 		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
 		map.put(Property.General.URI, new KeywordAnalyzer());
-		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_35), map);
+		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_36), map);
 	}
 	
 	

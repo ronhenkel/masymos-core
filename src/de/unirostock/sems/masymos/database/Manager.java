@@ -49,30 +49,8 @@ public class Manager {
 	}
 	
 	private void initializeManager(String path, Boolean isEmbedded) {
-		//if (isEmbedded) {
-			graphDb = new GraphDatabaseFactory().
-				    newEmbeddedDatabaseBuilder( new File(path) ).
-				    //setConfig( GraphDatabaseSettings.node_keys_indexable, Property.General.NODETYPE).
-				    //setConfig( GraphDatabaseSettings.node_auto_indexing, "true" ).			    
-				    newGraphDatabase();	
-//		} else {	 
-//			
-//			Map<String, String> conf = new HashMap<String, String>();
-//			conf.put("ha.cluster_server", ":5001-5003");
-//			conf.put("ha.initial_hosts", ":5001,:5002,:5003");
-//			conf.put("online_backup_enabled", "false");
-//			
-//	
-//			graphDb = new HighlyAvailableGraphDatabaseFactory().
-//				newHighlyAvailableDatabaseBuilder(path).
-//				setConfig( GraphDatabaseSettings.node_keys_indexable, Property.General.NODETYPE).
-//			    setConfig( GraphDatabaseSettings.node_auto_indexing, "true" ).
-//			    setConfig( HaSettings.server_id, "2" ).
-//			    setConfig( HaSettings.ha_server, ":6002").			    
-//			    setConfig( conf ).
-//			    newGraphDatabase();
-//		    		    
-//		}
+		
+		graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( new File(path) );				   		
 		registerShutdownHook(graphDb);		
 		
 	}
@@ -183,16 +161,19 @@ public class Manager {
 		throw new CloneNotSupportedException();
 	}
 
-	private static void registerShutdownHook(final GraphDatabaseService graphDb) {
-		// Registers a shutdown hook for the Neo4j instance so that it
-		// shuts down nicely when the VM exits (even if you "Ctrl-C" the
-		// running example before it's completed)
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				graphDb.shutdown();
-			}
-		});
+	private static void registerShutdownHook( final GraphDatabaseService graphDb )
+	{
+	    // Registers a shutdown hook for the Neo4j instance so that it
+	    // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+	    // running application).
+	    Runtime.getRuntime().addShutdownHook( new Thread()
+	    {
+	        @Override
+	        public void run()
+	        {
+	            graphDb.shutdown();
+	        }
+	    } );
 	}
 
 	public Map<String, ReadableIndex<?>> getIndexMap() {

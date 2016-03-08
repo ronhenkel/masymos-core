@@ -160,15 +160,17 @@ public class SBMLExtractor extends Extractor{
 			}	
 		}
 		
-		//store and index non RDF 
-		if (annotation.getNonRDFannotation() != null){			
-			try {
-				annotationNode.setProperty(Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
-				annotationIndex.add(annotationNode, Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
-			} catch (XMLStreamException e) {
-				// TODO Auto-generated catch block
-			}
-		}
+		//store and index non RDF omitted because of Lucene errors
+//		if (annotation.getNonRDFannotation() != null){	
+//			
+//			try {
+//				annotationNode.setProperty(Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
+//				annotationIndex.add(annotationNode, Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
+//			} catch (XMLStreamException e) {
+//				System.out.println(e.getMessage());
+//			}
+//			
+//		}
 		
 		//get list of controlled vocabulary terms
 		List<CVTerm> cvtList = annotation.getListOfCVTerms();

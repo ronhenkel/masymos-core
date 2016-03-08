@@ -21,7 +21,7 @@ public class PublicationIndexAnalyzer extends Analyzer{
 		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
 		map.put(Property.Publication.YEAR, new KeywordAnalyzer());
 		map.put(Property.Publication.ID, new KeywordAnalyzer());
-		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_35), map);
+		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_36), map);
 	}
 	
 

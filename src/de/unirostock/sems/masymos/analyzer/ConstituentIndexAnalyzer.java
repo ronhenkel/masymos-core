@@ -19,7 +19,7 @@ public class ConstituentIndexAnalyzer extends Analyzer{
 	private final static PerFieldAnalyzerWrapper createConstituentsIndexAnalyzer() {
 		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
 		map.put(Property.General.URI, new LowerCaseKeywordAnalyzer());		
-		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_35), map);
+		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_36), map);
 	}
 	
 	@Override

@@ -12,7 +12,7 @@ public class LowerCaseKeywordAnalyzer extends Analyzer{
 
 	@Override
 	public TokenStream tokenStream(String fileName, Reader reader) {
-		return new LowerCaseFilter( Version.LUCENE_35, new KeywordTokenizer( reader ) );
+		return new LowerCaseFilter( Version.LUCENE_36, new KeywordTokenizer( reader ) );
 	}
 
 }

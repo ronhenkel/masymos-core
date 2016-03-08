@@ -24,12 +24,10 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.util.OntologyFactory;
 
 public class Ontology {
-
-	public static void extractOntology(String path, String ontologyName){
+	
+	public static void extractOntology(File file, String ontologyName){
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-
-		File file = new File(path);
 		OWLOntology o;
 		try {
 			o = manager.loadOntologyFromOntologyDocument(file);
