@@ -7,6 +7,7 @@ import java.util.List;
 
 import de.unirostock.sems.masymos.configuration.RankAggregationType;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.util.ResultSetUtil;
 
 public class RankAggregation {
 		
@@ -86,10 +87,13 @@ public class RankAggregation {
 				if(((ranking1OfObject1 - ranking1OfObject2) * (ranking2OfObject1 - ranking2OfObject2)) <= 0)
 					sum++;
 				}
-				
-			//the normalized distance 
+		
+			
+		if(k > 0)	
+			//the normalized distance 	
 			sum = sum/(k * (k-1)/2);
-			return sum;	
+		
+		return sum;	
 	}
 
 	private static double distance_avg(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){
@@ -108,12 +112,12 @@ public class RankAggregation {
 		return sum;
 	}
 
-	private static void swap(List<ModelResultSet> ranker, int i, int j){
-		ModelResultSet o1 = ranker.get(i);
-		ModelResultSet o2 = ranker.get(j);
+	private static void swap(List<ModelResultSet> ranker, int index1, int index2){
+		ModelResultSet object1 = ranker.get(index1);
+		ModelResultSet object2 = ranker.get(index2);
 	
-		ranker.set(j, o1);
-		ranker.set(i, o2);
+		ranker.set(index1, object2);
+		ranker.set(index2, object1);
 	}
 
 	private static List<ModelResultSet> adj (List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){ //adjacent pairs, based on Ke-tau
@@ -146,24 +150,29 @@ public class RankAggregation {
 	
 	private static List<ModelResultSet> combMNZ(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){
 		int s = rankersList.size();
-		for(ModelResultSet o: aggregateRanker){
-			int indexOf_o = aggregateRanker.indexOf(o) + 1; 
-			int h = 0;
-			float brn_sum = 0;  //Borda rank normalization
-			
-			for(int i = 0; i < s; i++){ //compute h
-				List<ModelResultSet> ranker_i = rankersList.get(i);
-				
-				if (ranker_i.contains(o)){
-					int ranking_o = ranker_i.indexOf(o) + 1;
-					h++;
-					brn_sum += 1 - ((double)(ranking_o - 1) / aggregateRanker.size());  // brn_i
+		
+		if((aggregateRanker != null) && (!aggregateRanker.isEmpty())) {
+			for (ModelResultSet o : aggregateRanker) {
+				int indexOf_o = aggregateRanker.indexOf(o);
+				int h = 0; //denotes the number of times object o appears in the rankers
+				float brn_sum = 0; //Borda rank normalization for the object o
+
+				for (int i = 0; i < s; i++) { //compute h
+					List<ModelResultSet> ranker_i = rankersList.get(i);
+
+					if (ranker_i.contains(o)) {
+						int ranking_o = ranker_i.indexOf(o) + 1; //Indexshift
+						h++;
+						brn_sum += 1 - ((double) (ranking_o - 1) / aggregateRanker.size()); //update brn_i
+					}
 				}
+
+				o.setScore(brn_sum * h);
+				aggregateRanker.set(indexOf_o, o); //Replace the object (new score)
 			}
-			
-			o.setScore(brn_sum * h);
-			aggregateRanker.set(indexOf_o, o);
 		}
+		
+		ResultSetUtil.sortModelResultSetByScore(aggregateRanker);
 		return aggregateRanker;
 	}
 	
@@ -174,11 +183,13 @@ public class RankAggregation {
 		int rankingOfObject2;
 		
 		for(int i = 1; i < aggregateRankerLength; i++)
-			for(int j = 0; j < i; j++){
+			for(int j = i-1; j >= 0; j--){
 				int pro = 0;
 				int con = 0;
-				ModelResultSet object1 = aggregateRanker.get(i);
-				ModelResultSet object2 = aggregateRanker.get(j);
+				ModelResultSet object2 = aggregateRanker.get(i);
+				ModelResultSet object1 = aggregateRanker.get(j);
+				
+				//Compare the rankings of object1 and object2 in each ranker 
 				for(int l = 0; l < rankersListLength; l++){
 					List<ModelResultSet> ranker_i = rankersList.get(l);
 					
@@ -192,11 +203,15 @@ public class RankAggregation {
 					else
 						rankingOfObject2 = Integer.MAX_VALUE; 
 					
-					if(rankingOfObject1 > rankingOfObject2)
+					//update pro if the ranking is the same as in the initial aggregate ranker
+					//update cons otherwise
+					if(rankingOfObject2 > rankingOfObject1)
 						pro++;
 					else
 						con++;
 				}
+				
+				//swap object1 and object2 if the majority of the rankers prefer object2 to object1 (if ranking of object 2 < ranking of object1)
 				if(con > pro){
 					swap(aggregateRanker, i, j);
 				}
@@ -216,7 +231,7 @@ public class RankAggregation {
 		weights.put(2, 1);
 		weights.put(3, 1);
 		
-		int s = rankersList.size();
+		int numberOfRankers = rankersList.size();
 		int aggregateRankerLength = aggregateRanker.size();
 		boolean[][] M = new boolean[aggregateRankerLength][aggregateRankerLength];
 	
@@ -233,7 +248,8 @@ public class RankAggregation {
 				ModelResultSet object1 = aggregateRanker.get(i);
 				ModelResultSet object2 = aggregateRanker.get(j);
 				int score = 0;
-				for(int l = 0; l < s; l++){
+				
+				for(int l = 0; l < numberOfRankers; l++){
 					List<ModelResultSet> ranker_i = rankersList.get(l);
 					
 					if(ranker_i.contains(object1))
@@ -246,7 +262,7 @@ public class RankAggregation {
 					else
 						rankingOfObject2 = Integer.MAX_VALUE; 
 					
-					if(rankingOfObject1 < rankingOfObject2)
+					if(rankingOfObject1 > rankingOfObject2)
 						score += weights.get(l);
 				}
 				

@@ -38,9 +38,6 @@ public class RankAggregationUtil {
 		rankersList.add(personRanker);
 		rankersList.add(publicationRanker);
 		
-		
-		
-		
 		return rankersList;
 		
 	}
