@@ -16,6 +16,7 @@ import de.unirostock.sems.masymos.query.types.AnnotationQuery;
 import de.unirostock.sems.masymos.query.types.PersonQuery;
 import de.unirostock.sems.masymos.query.types.PublicationQuery;
 import de.unirostock.sems.masymos.query.types.SedmlQuery;
+import de.unirostock.sems.masymos.util.ResultSetUtil;
 
 public class QueryAdapter {
 
@@ -98,6 +99,7 @@ public class QueryAdapter {
 			}
 			
 		}
+		rs = ResultSetUtil.sortModelResultSetByScore(rs);
 		return rs;
 	}
 	

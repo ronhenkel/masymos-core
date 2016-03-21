@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
@@ -85,10 +87,18 @@ public class ResultSetUtil {
 				//count occurrences of a model
 				count = freq.containsKey(resultSet.getModelId()) ? freq.get(resultSet.getModelId()) : 0;
 				freq.put(resultSet.getModelId(), count + 1);
-				//store model to list
+				
+				//sum up scores
 				ModelResultSet toBeKeptResultSet = toBeKept.get(resultSet.getModelId());
 				float score = toBeKeptResultSet.getScore() + resultSet.getScore();
 				toBeKeptResultSet.setScore(score);
+				
+				//check if from same index
+				if (StringUtils.isEmpty(toBeKeptResultSet.getIndexSource()) 
+					|| !toBeKeptResultSet.getIndexSource().equals(resultSet.getIndexSource())){
+					toBeKeptResultSet.setIndexSource("n/a");
+				}				
+				//store model to list
 				toBeKept.put(resultSet.getModelId(), toBeKeptResultSet); 
 			} else {
 				toBeKept.put(resultSet.getModelId(), resultSet);
