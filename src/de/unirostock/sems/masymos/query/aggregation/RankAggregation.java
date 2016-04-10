@@ -1,12 +1,13 @@
 package de.unirostock.sems.masymos.query.aggregation;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import de.unirostock.sems.masymos.configuration.RankAggregationType;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.util.RankerHandler;
 import de.unirostock.sems.masymos.util.ResultSetUtil;
 
 public class RankAggregation {
@@ -14,19 +15,25 @@ public class RankAggregation {
 	
 	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker, RankAggregationType.Types type){
 
-		
 		if (aggregateRanker.isEmpty()) return aggregateRanker;
+		
+		RankerHandler aggregateRankerH = new RankerHandler(aggregateRanker);
+		List<RankerHandler> rankersListH = new LinkedList<RankerHandler>();
+		for(List<ModelResultSet> ranker: rankersList){
+			RankerHandler rankerH = new RankerHandler(ranker);
+			rankersListH.add(rankerH);
+		}
 		
 		switch(type){ 
 			
 		case ADJACENT_PAIRS: 
-			return adj(rankersList, aggregateRanker); 
+			return adj(rankersListH, aggregateRankerH); 
 		case COMB_MNZ:
-			return combMNZ(rankersList, aggregateRanker);
+			return combMNZ(rankersListH, aggregateRankerH);
 		case LOCAL_KEMENIZATION:
-			return localKemenization(rankersList, aggregateRanker);
+			return localKemenization(rankersListH, aggregateRankerH);
 		case SUPERVISED_LOCAL_KEMENIZATION: 
-			return supervisedLocalKemenization(rankersList, aggregateRanker);
+			return supervisedLocalKemenization(rankersListH, aggregateRankerH);
 		case DEFAULT: 
 			return aggregateRanker;
 		default: 
@@ -34,108 +41,73 @@ public class RankAggregation {
 		}
 	}
 	
-	
-	private static List<Integer> getRankersLengths(List<List<ModelResultSet>> rankersList){
-		int s = rankersList.size();
+
+	//The Kendall tau ranking distance between aggregateRanker and ranker_i
+	private static int distance(RankerHandler aggregateRankerH, RankerHandler ranker_iH){
 		
-		List<Integer> length_rankers = new LinkedList<Integer>();
-		for(int i = 0; i < s; i++){
-			length_rankers.add(rankersList.get(i).size());
-		}
-		return length_rankers;
-	}
-	
-	private static int getMeanRankersLengths (List<List<ModelResultSet>> rankersList){
-		int s = rankersList.size();
-		List<Integer> length_rankers = getRankersLengths(rankersList);
-		Collections.sort(length_rankers);
-		return length_rankers.get(s/2);
-	}
-	
-	private static int distance(int k, List<ModelResultSet> ranker_1, List<ModelResultSet> ranker_2){
+		int k = aggregateRankerH.getLength();
+		int sumOfDisagreements = 0;
+		int ranking2OfModel1;
+		int ranking2OfModel2;
+		String modelID1;
+		String modelID2;
+		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
 		
-		int sum = 0;
-		double ranking1OfObject1;
-		double ranking1OfObject2;
-		double ranking2OfObject1;
-		double ranking2OfObject2;
-		ModelResultSet object1;
-		ModelResultSet object2;
+		if(ranker_iH.getLength() != 0)
+			for(int i = 0; i < k; i++)
+				for(int j = i+1; j < k; j++){
+					modelID1 = modelIDList.get(i);
+					modelID2 = modelIDList.get(j);
+					ranking2OfModel1 = ranker_iH.getRankingByModelID(modelID1);
+					ranking2OfModel2 = ranker_iH.getRankingByModelID(modelID2);
+					
+					if (ranking2OfModel1 == -1)
+						ranking2OfModel1 = k+1;
+					
+					if (ranking2OfModel2 == -1)
+						ranking2OfModel2 = k+1;
+					
+					if(ranking2OfModel1 > ranking2OfModel2)
+						sumOfDisagreements++;
+					}
 		
-		for(int i = 0; i < Math.min(k, ranker_1.size()); i++)
-			for(int j = 0; j <  Math.min(k, ranker_2.size()); j++){
-				object1 = ranker_1.get(i);
-				ranking1OfObject1 = i + 1; 
-				
-				if(ranker_2.contains(object1))
-					ranking2OfObject1 = ranker_2.indexOf(object1) + 1;
-				else{
-					ranking2OfObject1 = k+1;
-				}
-				
-				object2 = ranker_2.get(i);
-				ranking2OfObject2 = j + 1; 
-				
-				if(ranker_1.contains(object2))
-					ranking1OfObject2 = ranker_1.indexOf(object1) + 1;
-				else{
-					ranking1OfObject2 = k+1;
-				}
-				
-				//In the case when object1, object2 both appear in one list and they are both absent in another -> no disagreement
-				
-				if(((ranking1OfObject1 - ranking1OfObject2) * (ranking2OfObject1 - ranking2OfObject2)) <= 0)
-					sum++;
-				}
-		
-			
-		if(k > 0)	
-			//the normalized distance 	
-			sum = sum/(k * (k-1)/2);
-		
-		return sum;	
+		return sumOfDisagreements;	
 	}
 
-	private static double distance_avg(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){
-		int s = rankersList.size();
-		double sum = 0;
-		
-		int mean_length = getMeanRankersLengths(rankersList);
-		
-		List<ModelResultSet> ranker_i = new LinkedList<ModelResultSet>();
+	
+	//The average distance between the aggregate ranker and all other rankers in rankersList
+	private static double distanceAvg(List<RankerHandler> rankersListH, RankerHandler aggregateRankerH){
+		int s = rankersListH.size();
+		double sumDistance = 0;
 		
 		for(int i = 0; i < s; i++){
-			ranker_i = rankersList.get(i);
-			sum += distance(mean_length, ranker_i, aggregateRanker);
+			RankerHandler ranker_iH = rankersListH.get(i);
+			sumDistance += distance(aggregateRankerH, ranker_iH);
 		}
-		sum = sum / s;
-		return sum;
+		
+		if(s > 0)
+			sumDistance = sumDistance / s;
+		return sumDistance;
 	}
 
-	private static void swap(List<ModelResultSet> ranker, int index1, int index2){
-		ModelResultSet object1 = ranker.get(index1);
-		ModelResultSet object2 = ranker.get(index2);
 	
-		ranker.set(index1, object2);
-		ranker.set(index2, object1);
-	}
-
-	private static List<ModelResultSet> adj (List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){ //adjacent pairs, based on Ke-tau
+	private static List<ModelResultSet> adj (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){ //adjacent pairs, based on Ke-tau
 		double epsilon_min = Integer.MAX_VALUE;
 		int count = 0;
 		//boolean changed = false;
+		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
 		
 		while (count < 100){ //repeat for-loop until no further reductions can be performed
 			//changed = false;
-			for(int i = 0; i < aggregateRanker.size() - 2; i++){
-				List<ModelResultSet> tempRanker = aggregateRanker;
-				swap(tempRanker, i, i+1);
-				double epsilon_av = distance_avg(rankersList, tempRanker);
+			for(int i = 0; i < aggregateRankerH.getLength() - 2; i++){
+				aggregateRankerH.swap(modelIDList.get(i), modelIDList.get(i+1));
+				double epsilon_av = distanceAvg(rankersListH, aggregateRankerH);
 				if (epsilon_av < epsilon_min){
-					aggregateRanker = tempRanker;
 					epsilon_min = epsilon_av;
 					//changed = true;
-				}	
+				}
+				else
+					aggregateRankerH.swap(modelIDList.get(i), modelIDList.get(i+1)); //reset
 			}
 			/*
 			if (changed){
@@ -145,98 +117,108 @@ public class RankAggregation {
 			else*/ 
 				count++;
 		}
-		return aggregateRanker;
+		
+		//set new scores
+		aggregateRankerH.setScoresToNAN();
+		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		return results;
 	}
 	
-	private static List<ModelResultSet> combMNZ(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){
-		int s = rankersList.size();
+	
+	private static List<ModelResultSet> combMNZ(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
+		int s = rankersListH.size();
 		
-		if((aggregateRanker != null) && (!aggregateRanker.isEmpty())) {
-			for (ModelResultSet o : aggregateRanker) {
-				int indexOf_o = aggregateRanker.indexOf(o);
-				int h = 0; //denotes the number of times object o appears in the rankers
-				float brn_sum = 0; //Borda rank normalization for the object o
+		for (String modelID : aggregateRankerH.getModelIDList()) {
+			int h = 0; //denotes the number of times model appears in the rankers
+			float brn_sum = 0; //Borda rank normalization for the model
 
-				for (int i = 0; i < s; i++) { //compute h
-					List<ModelResultSet> ranker_i = rankersList.get(i);
-
-					if (ranker_i.contains(o)) {
-						int ranking_o = ranker_i.indexOf(o) + 1; //Indexshift
-						h++;
-						brn_sum += 1 - ((double) (ranking_o - 1) / aggregateRanker.size()); //update brn_i
-					}
+			for (int i = 0; i < s; i++) { //compute h
+				RankerHandler ranker_iH = rankersListH.get(i);
+				
+				int ranking = ranker_iH.getRankingByModelID(modelID);
+				if (ranking != -1){ //if 'ranker_i' contains model
+					h++;
+					brn_sum += 1 - ((double) (ranking - 1) / aggregateRankerH.getLength());
 				}
-
-				o.setScore(brn_sum * h);
-				aggregateRanker.set(indexOf_o, o); //Replace the object (new score)
 			}
+
+			float newScore = brn_sum * h;
+			aggregateRankerH.updateScoreByModelID(modelID, newScore);
 		}
 		
-		ResultSetUtil.sortModelResultSetByScore(aggregateRanker);
-		return aggregateRanker;
+		List<ModelResultSet> results = aggregateRankerH.makeResultsList();
+		ResultSetUtil.sortModelResultSetByScore(results);
+		return results;
 	}
 	
-	private static List<ModelResultSet> localKemenization(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){
-		int rankersListLength = rankersList.size();
-		int aggregateRankerLength = aggregateRanker.size();
-		int rankingOfObject1;
-		int rankingOfObject2;
+	
+	private static List<ModelResultSet> localKemenization(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
+		int rankersListLength = rankersListH.size();
+		int aggregateRankerLength = aggregateRankerH.getLength();
+		int rankingOfModel1;
+		int rankingOfModel2;
+		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
 		
-		for(int i = 1; i < aggregateRankerLength; i++)
+		for(int i = 1; i < aggregateRankerLength; i++){
+			String modelID2 = modelIDList.get(i);
+			
 			for(int j = i-1; j >= 0; j--){
 				int pro = 0;
 				int con = 0;
-				ModelResultSet object2 = aggregateRanker.get(i);
-				ModelResultSet object1 = aggregateRanker.get(j);
+				String modelID1 = modelIDList.get(j);
 				
-				//Compare the rankings of object1 and object2 in each ranker 
+				//Compare the rankings of model1 and model2 in each ranker 
 				for(int l = 0; l < rankersListLength; l++){
-					List<ModelResultSet> ranker_i = rankersList.get(l);
+					RankerHandler ranker_i = rankersListH.get(l);
 					
-					if(ranker_i.contains(object1))
-						rankingOfObject1 = ranker_i.indexOf(object1);
-					else
-						rankingOfObject1 = Integer.MAX_VALUE; 
+					rankingOfModel1 = ranker_i.getRankingByModelID(modelID1);
+					if(rankingOfModel1 == -1)
+						rankingOfModel1 = Integer.MAX_VALUE; 
 					
-					if(ranker_i.contains(object2))
-						rankingOfObject2 = ranker_i.indexOf(object2);
-					else
-						rankingOfObject2 = Integer.MAX_VALUE; 
+					rankingOfModel2 = ranker_i.getRankingByModelID(modelID2);
+					if(rankingOfModel2 == -1)
+						rankingOfModel2 = Integer.MAX_VALUE; 
 					
 					//update pro if the ranking is the same as in the initial aggregate ranker
 					//update cons otherwise
-					if(rankingOfObject2 > rankingOfObject1)
+					if(rankingOfModel2 > rankingOfModel1)
 						pro++;
-					else
+					else if (rankingOfModel2 < rankingOfModel1)
 						con++;
 				}
 				
-				//swap object1 and object2 if the majority of the rankers prefer object2 to object1 (if ranking of object 2 < ranking of object1)
+				//swap model1 and model2 if the majority of the rankers prefer model2 to model1 (if ranking of model2 < ranking of model1)
 				if(con > pro){
-					swap(aggregateRanker, i, j);
+					aggregateRankerH.swap(modelID2, modelID1);
 				}
 				else if (pro >= con)
 					break;
-				
 			}
-		return aggregateRanker;
+		}
+		
+		//set new scores
+		aggregateRankerH.setScoresToNAN();
+		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		return results;
 	}
 	
-	private static List<ModelResultSet> supervisedLocalKemenization ( List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker){
+	
+	private static List<ModelResultSet> supervisedLocalKemenization (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
 		
 		//to be out sourced
 		HashMap<Integer, Integer> weights = new HashMap<Integer, Integer>();
-		weights.put(0, 4);
+		weights.put(0, 5);
 		weights.put(1, 3);
 		weights.put(2, 1);
 		weights.put(3, 1);
 		
-		int numberOfRankers = rankersList.size();
-		int aggregateRankerLength = aggregateRanker.size();
+		int numberOfRankers = rankersListH.size();
+		int aggregateRankerLength = aggregateRankerH.getLength();
 		boolean[][] M = new boolean[aggregateRankerLength][aggregateRankerLength];
 	
-		int rankingOfObject1;
-		int rankingOfObject2;
+		int rankingOfModel1;
+		int rankingOfModel2;
+		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
 		
 		int weightsSum = 0;
 		for(int o: weights.values())
@@ -245,42 +227,47 @@ public class RankAggregation {
 		
 		for(int i = 0; i < aggregateRankerLength; i++){
 			for(int j = i + 1 ; j < aggregateRankerLength; j++){
-				ModelResultSet object1 = aggregateRanker.get(i);
-				ModelResultSet object2 = aggregateRanker.get(j);
+				String modelID1 = modelIDList.get(i);
+				String modelID2 = modelIDList.get(j);
 				int score = 0;
 				
 				for(int l = 0; l < numberOfRankers; l++){
-					List<ModelResultSet> ranker_i = rankersList.get(l);
+					RankerHandler ranker_iH = rankersListH.get(l);
 					
-					if(ranker_i.contains(object1))
-						rankingOfObject1 = ranker_i.indexOf(object1) + 1;
-					else
-						rankingOfObject1 = Integer.MAX_VALUE; 
+					rankingOfModel1 = ranker_iH.getRankingByModelID(modelID1);
+					if(rankingOfModel1 == -1)
+						rankingOfModel1 = Integer.MAX_VALUE; 
 					
-					if(ranker_i.contains(object2))
-						rankingOfObject2 = ranker_i.indexOf(object2) + 1;
-					else
-						rankingOfObject2 = Integer.MAX_VALUE; 
+					rankingOfModel2 = ranker_iH.getRankingByModelID(modelID2);
+					if(rankingOfModel2 == -1)
+						rankingOfModel2 = Integer.MAX_VALUE; 
 					
-					if(rankingOfObject1 > rankingOfObject2)
+					if(rankingOfModel1 < rankingOfModel2)
 						score += weights.get(l);
 				}
 				
-				if (score > 0.5 * weightsSum){
+				if (score >= 0.5 * weightsSum){
 					M[i][j] = true;
 					M[j][i] = false;
 				}
-				
-			}
-		}
-		for(int x = 0; x < aggregateRankerLength; x++){
-			for(int y = x + 1; y < aggregateRankerLength; y++){
-				if(M[x][y] == false)
-					swap(aggregateRanker, x, y);
 			}
 		}
 		
-		return aggregateRanker;
+		for(int i = 1; i < aggregateRankerLength; i++){
+			String modelID2 = modelIDList.get(i);
+			
+			for(int j = i-1; j >= 0; j--){
+				String modelID1 = modelIDList.get(j);
+				
+				if(M[j][i] == false)
+					aggregateRankerH.swap(modelID1, modelID2);
+			}
+		}
+		
+		//set new scores
+		aggregateRankerH.setScoresToNAN();
+		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		return results;
 	}
 	
 

@@ -18,14 +18,15 @@ public class RankAggregationUtil {
 		
 		
 		for(ModelResultSet e : toBeSplit){
+			ModelResultSet model = new ModelResultSet(e.getScore(), e.getModelId(), e.getModelId(), e.getIndexSource());
 			if (e.getIndexSource().equals("ModelIndex"))
-				modelRanker.add(e);
+				modelRanker.add(model);
 			if (e.getIndexSource().equals("AnnotationIndex"))
-				annotationRanker.add(e);
+				annotationRanker.add(model);
 			if (e.getIndexSource().equals("PersonIndex"))
-				personRanker.add(e);
+				personRanker.add(model);
 			if (e.getIndexSource().equals("PublicationIndex"))
-				publicationRanker.add(e);
+				publicationRanker.add(model);
 		}
 		
 		modelRanker = ResultSetUtil.collateModelResultSetByModelId(modelRanker);

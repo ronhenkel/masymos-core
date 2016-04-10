@@ -46,6 +46,25 @@ public class ModelResultSet implements IDocumentResultSetInterface {
 	public String getVersionID() {
 		return versionID;
 	}
+	
+	public ModelResultSet copyModelResultSet(){
+		ModelResultSet newSet = new ModelResultSet();
+		newSet.modelName = this.getModelName();
+		newSet.score = this.getScore();
+		newSet.modelID = this.getModelID();
+		newSet.versionID = this.getVersionId();
+		newSet.documentURI = this.getDocumentURI();
+		newSet.xmldoc = this.getXmldoc();
+		newSet.filename = this.getFilename();
+		newSet.fileId = this.getFileId();
+		newSet.indexSource = this.getIndexSource();
+		
+		return newSet;
+	}
+	
+	protected ModelResultSet(){
+		
+	}
 
 
 	public ModelResultSet(float score, String modelId, String modelName, String versionID, String documentURI, String filename, String explanation, String indexSource){
