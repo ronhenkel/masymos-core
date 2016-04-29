@@ -97,8 +97,6 @@ public class RankAggregation {
 		//boolean changed = false;
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
 		
-		long startTime = System.currentTimeMillis();
-		
 		while (count < 100){ //repeat for-loop until no further reductions can be performed
 			//changed = false;
 			for(int i = 0; i < aggregateRankerH.getLength() - 2; i++){
@@ -119,11 +117,7 @@ public class RankAggregation {
 			else*/ 
 				count++;
 		}
-		
-		long stopTime = System.currentTimeMillis();
-	    long elapsedTime = stopTime - startTime;
-	    System.out.println(elapsedTime);
-	      
+		  
 		//set new scores
 		aggregateRankerH.setScoresToNAN();
 		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
@@ -192,8 +186,6 @@ public class RankAggregation {
 		double[] distanceToRankers = new double[4];
 		double[] tempDistanceToRankers = new double[4];
 		
-		long startTime = System.currentTimeMillis();
-		
 		while (count < 100){ //repeat for-loop until no further reductions can be performed
 			//changed = false;
 			for(int i = 0; i < aggregateRankerH.getLength() - 2; i++){
@@ -220,10 +212,6 @@ public class RankAggregation {
 				count++;
 		}
 		
-		long stopTime = System.currentTimeMillis();
-	    long elapsedTime = stopTime - startTime;
-	    System.out.println(elapsedTime);
-	    
 		//set new scores
 		aggregateRankerH.setScoresToNAN();
 		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
