@@ -1,19 +1,16 @@
 package de.unirostock.sems.masymos.analyzer;
 
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.KeywordAnalyzer;
-import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util.Version;
 
 import de.unirostock.sems.masymos.configuration.Property;
 
-public class SedmlndexAnalyzer extends Analyzer{
+public class SedmlndexAnalyzer{
 	
 
 	protected final static PerFieldAnalyzerWrapper sedmlFullIndexAnalyzer =  createSedmlFullIndexAnalyzer();
@@ -22,12 +19,7 @@ public class SedmlndexAnalyzer extends Analyzer{
 		Map<String, Analyzer> analyzers = new HashMap<String, Analyzer>();
 		analyzers.put(Property.General.URI, new KeywordAnalyzer());	
 		//analyzers.put(Property.SEDML.MODELSOURCE, new KeywordAnalyzer());	
-		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_36), analyzers);
-	}
-	
-	@Override
-	public TokenStream tokenStream(String fieldName, Reader reader) {
-		return sedmlFullIndexAnalyzer.tokenStream(fieldName, reader);
+		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(), analyzers);
 	}
 
 	public static PerFieldAnalyzerWrapper getSedmlFullIndexAnalyzer() {

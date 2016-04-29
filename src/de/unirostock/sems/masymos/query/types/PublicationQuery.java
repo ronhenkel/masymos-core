@@ -1,7 +1,5 @@
 package de.unirostock.sems.masymos.query.types;
 
-import org.apache.lucene.queryParser.ParseException;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10,7 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
 import org.neo4j.graphdb.Node;
@@ -108,7 +107,7 @@ public class PublicationQuery implements IQueryInterface {
 	
 	private Query createQueryFromQueryMap() throws ParseException{
 		if (queryMap.isEmpty()) return null;
-		QueryParser qp = new QueryParser(Version.LUCENE_35, Property.Publication.TITLE, analyzer);
+		QueryParser qp = new QueryParser(Property.Publication.TITLE, analyzer);
 		StringBuffer q = new StringBuffer();
 		for (Iterator<PublicationFieldEnumerator> queryMapIt = queryMap.keySet().iterator(); queryMapIt.hasNext();) {
 			PublicationFieldEnumerator pe = (PublicationFieldEnumerator) queryMapIt.next();
