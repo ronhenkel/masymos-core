@@ -13,7 +13,7 @@ import de.unirostock.sems.masymos.util.ResultSetUtil;
 public class RankAggregation {
 		
 	
-	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker, RankAggregationType.Types type){
+	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> aggregateRanker, RankAggregationType.Types type, int rankersWeights){
 
 		if (aggregateRanker.isEmpty()) return aggregateRanker;
 		
@@ -27,13 +27,13 @@ public class RankAggregation {
 		switch(type){ 
 			
 		case ADJACENT_PAIRS: 
-			return adj(rankersListH, aggregateRankerH); 
+			return optimisedAdj(rankersListH, aggregateRankerH); 
 		case COMB_MNZ:
 			return combMNZ(rankersListH, aggregateRankerH);
 		case LOCAL_KEMENIZATION:
 			return localKemenization(rankersListH, aggregateRankerH);
 		case SUPERVISED_LOCAL_KEMENIZATION: 
-			return supervisedLocalKemenization(rankersListH, aggregateRankerH);
+			return supervisedLocalKemenization(rankersListH, aggregateRankerH, rankersWeights);
 		case DEFAULT: 
 			return aggregateRanker;
 		default: 
@@ -89,13 +89,15 @@ public class RankAggregation {
 			sumDistance = sumDistance / s;
 		return sumDistance;
 	}
-
+	
 	
 	private static List<ModelResultSet> adj (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){ //adjacent pairs, based on Ke-tau
 		double epsilon_min = Integer.MAX_VALUE;
 		int count = 0;
 		//boolean changed = false;
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
+		
+		long startTime = System.currentTimeMillis();
 		
 		while (count < 100){ //repeat for-loop until no further reductions can be performed
 			//changed = false;
@@ -118,12 +120,115 @@ public class RankAggregation {
 				count++;
 		}
 		
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    System.out.println(elapsedTime);
+	      
 		//set new scores
 		aggregateRankerH.setScoresToNAN();
 		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
 		return results;
 	}
 	
+	private static int optimisedDistance(RankerHandler aggregateRankerH, RankerHandler ranker_iH){
+		
+		int k = ranker_iH.getLength();
+		int sumOfDisagreements = 0;
+		int ranking2OfModel1;
+		int ranking2OfModel2;
+		String modelID1;
+		String modelID2;
+		ArrayList<String> modelIDList = ranker_iH.getModelIDList();
+		RankerHandler diff = aggregateRankerH.getDifferenceTo(ranker_iH);
+		
+		for(int i = 0; i < k; i++){
+			modelID1 = modelIDList.get(i);
+			
+			for(int j = i+1; j < k; j++){
+				modelID2 = modelIDList.get(j);
+				ranking2OfModel1 = aggregateRankerH.getRankingByModelID(modelID1);
+				ranking2OfModel2 = aggregateRankerH.getRankingByModelID(modelID2);
+				
+				if(ranking2OfModel1 > ranking2OfModel2)
+					sumOfDisagreements++;
+				}
+			sumOfDisagreements += diff.getRankingByModelID(modelID1);
+		}
+			
+		return sumOfDisagreements;	
+	}
+	
+	
+	//The average distance between the aggregate ranker and all other rankers in rankersList
+	private static double optimisedDistanceAvg(List<RankerHandler> rankersListH, RankerHandler aggregateRankerH, String modelID1, String modelID2, double[] distanceToRankers){
+		int s = rankersListH.size();
+		double sumDistance = 0;
+		
+		for(int i = 0; i < s; i++){
+			RankerHandler ranker_iH = rankersListH.get(i);
+			if (ranker_iH.containsByModelID(modelID1) && ranker_iH.containsByModelID(modelID2)){
+				if (ranker_iH.getRankingByModelID(modelID1) > ranker_iH.getRankingByModelID(modelID2))
+					distanceToRankers[i]++;
+				else 
+					distanceToRankers[i]--;
+			}
+				//distanceToRankers[i] = optimisedDistance(aggregateRankerH, ranker_iH);
+			if ((! ranker_iH.containsByModelID(modelID1)) && ranker_iH.containsByModelID(modelID2))
+				distanceToRankers[i]++;
+			sumDistance += distanceToRankers[i];
+		}
+		
+		if(s > 0)
+			sumDistance = sumDistance / s;
+		return sumDistance;
+	}
+	
+		
+	private static List<ModelResultSet> optimisedAdj (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){ //adjacent pairs, based on Ke-tau
+		double epsilon_min = Integer.MAX_VALUE;
+		int count = 0;
+		//boolean changed = false;
+		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
+		double[] distanceToRankers = new double[4];
+		double[] tempDistanceToRankers = new double[4];
+		
+		long startTime = System.currentTimeMillis();
+		
+		while (count < 100){ //repeat for-loop until no further reductions can be performed
+			//changed = false;
+			for(int i = 0; i < aggregateRankerH.getLength() - 2; i++){
+				aggregateRankerH.swap(modelIDList.get(i), modelIDList.get(i+1));
+				for(int r = 0; r < 4; r++)
+					tempDistanceToRankers[r] = distanceToRankers[r];
+				double epsilon_av = optimisedDistanceAvg(rankersListH, aggregateRankerH, modelIDList.get(i), modelIDList.get(i+1), tempDistanceToRankers);
+				if (epsilon_av < epsilon_min){
+					epsilon_min = epsilon_av;
+					for(int r = 0; r < 4; r++)
+						distanceToRankers[r] = tempDistanceToRankers[r];
+					//changed = true;
+				}
+				else{
+					aggregateRankerH.swap(modelIDList.get(i), modelIDList.get(i+1)); //reset
+				}
+			}
+			/*
+			if (changed){
+				
+				count = 0;
+			}
+			else*/ 
+				count++;
+		}
+		
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    System.out.println(elapsedTime);
+	    
+		//set new scores
+		aggregateRankerH.setScoresToNAN();
+		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		return results;
+	}
 	
 	private static List<ModelResultSet> combMNZ(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
 		int s = rankersListH.size();
@@ -158,6 +263,8 @@ public class RankAggregation {
 		int rankingOfModel1;
 		int rankingOfModel2;
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
+		
+		long startTime = System.currentTimeMillis();
 		
 		for(int i = 1; i < aggregateRankerLength; i++){
 			String modelID2 = modelIDList.get(i);
@@ -196,6 +303,10 @@ public class RankAggregation {
 			}
 		}
 		
+		long stopTime = System.currentTimeMillis();
+	    long elapsedTime = stopTime - startTime;
+	    System.out.println(elapsedTime);
+		
 		//set new scores
 		aggregateRankerH.setScoresToNAN();
 		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
@@ -203,14 +314,14 @@ public class RankAggregation {
 	}
 	
 	
-	private static List<ModelResultSet> supervisedLocalKemenization (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
+	private static List<ModelResultSet> supervisedLocalKemenization (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH, int rankersWeights){
 		
-		//to be out sourced
 		HashMap<Integer, Integer> weights = new HashMap<Integer, Integer>();
-		weights.put(0, 5);
-		weights.put(1, 3);
-		weights.put(2, 1);
-		weights.put(3, 1);
+		
+		for(int i = 0; i < 4; i++){
+			weights.put(i, rankersWeights % 100);
+			rankersWeights = rankersWeights / 100;
+		}
 		
 		int numberOfRankers = rankersListH.size();
 		int aggregateRankerLength = aggregateRankerH.getLength();

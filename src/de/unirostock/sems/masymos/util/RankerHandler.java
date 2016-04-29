@@ -52,6 +52,13 @@ public class RankerHandler {
 		else return -1;
 	}
 	
+	public boolean containsByModelID(String modelID){
+		if(modelIDRankingMap.get(modelID) != null)
+			return true;
+		else
+			return false;
+	}
+	
 	
 	public float getScoreByModelID(String modelID){
 		
@@ -77,6 +84,24 @@ public class RankerHandler {
 		this.modelIDRankingMap.put(modelID2, rankingOfModel1);
 		this.modelIDList.set(rankingOfModel1 - 1, modelID2);
 		this.modelIDList.set(rankingOfModel2 - 1, modelID1);
+	}
+	
+	
+	public RankerHandler getDifferenceTo(RankerHandler r2){  //this / r2
+		RankerHandler diff = new RankerHandler(null);
+		int count = 1;
+		
+		for(String modelId: this.modelIDList)
+			if (r2.containsByModelID(modelId)){  //if r2 doesn't contain model
+				ModelResultSet model = this.rankerMap.get(modelId);
+				ModelResultSet newModel = model.copyModelResultSet();
+				diff.rankerMap.put(model.getModelID(), newModel);
+				diff.modelIDRankingMap.put(model.getModelID(), count);
+				diff.modelIDList.add(model.getModelID());
+				count++;
+		}
+		
+		return diff;
 	}
 	
 	

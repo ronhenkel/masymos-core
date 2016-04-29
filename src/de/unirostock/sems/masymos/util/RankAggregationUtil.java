@@ -34,10 +34,10 @@ public class RankAggregationUtil {
 		personRanker = ResultSetUtil.collateModelResultSetByModelId(personRanker);
 		publicationRanker = ResultSetUtil.collateModelResultSetByModelId(publicationRanker);		
 		
-		rankersList.add(modelRanker);
-		rankersList.add(annotationRanker);
-		rankersList.add(personRanker);
-		rankersList.add(publicationRanker);
+		rankersList.add(0, modelRanker);
+		rankersList.add(1, annotationRanker);
+		rankersList.add(2, personRanker);
+		rankersList.add(3, publicationRanker);
 		
 		return rankersList;
 		
