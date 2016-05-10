@@ -1,31 +1,48 @@
 package de.unirostock.sems.masymos.analyzer;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.DelegatingAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import de.unirostock.sems.masymos.configuration.Property;
 
-public class PersonIndexAnalyzer{
+public class PersonIndexAnalyzer extends DelegatingAnalyzerWrapper{
 	
+	private final Analyzer defaultAnalyzer;
+	private final Map<String, Analyzer> fieldAnalyzers;
 
-	protected final static PerFieldAnalyzerWrapper personIndexAnalyzer =  createpersonExactAnalyzer();
-	private final static PerFieldAnalyzerWrapper createpersonExactAnalyzer() {		
-		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
-		map.put(Property.Person.FAMILYNAME, LowerCaseKeywordAnalyzer.getLowerCaseKeywordAnalyzer());
-		map.put(Property.Person.GIVENNAME, LowerCaseKeywordAnalyzer.getLowerCaseKeywordAnalyzer());
-		return new PerFieldAnalyzerWrapper(new StandardAnalyzer(), map);
+	public PersonIndexAnalyzer(Analyzer defaultAnalyzer) {
+		this(defaultAnalyzer, null);
+	}
+
+	public PersonIndexAnalyzer(Analyzer defaultAnalyzer, Map<String, Analyzer> fieldAnalyzers) {
+		super(PER_FIELD_REUSE_STRATEGY);
+		this.defaultAnalyzer = defaultAnalyzer;
+		this.fieldAnalyzers = (fieldAnalyzers != null) ? fieldAnalyzers : Collections.<String, Analyzer> emptyMap();
 	}
 	
+	public PersonIndexAnalyzer() {
+		super(PER_FIELD_REUSE_STRATEGY);
+		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
+		map.put(Property.Person.FAMILYNAME, AnalyzerHandler.getLowercasekeywordanalyzer());
+		map.put(Property.Person.GIVENNAME, AnalyzerHandler.getLowercasekeywordanalyzer());
+		this.defaultAnalyzer = new StandardAnalyzer();
+		this.fieldAnalyzers = map;
 		
+	}
 
-		public static PerFieldAnalyzerWrapper getPersonIndexAnalyzer() {
-			return personIndexAnalyzer;
-		}
+	@Override
+	protected Analyzer getWrappedAnalyzer(String fieldName) {
+		Analyzer analyzer = fieldAnalyzers.get(fieldName);
+		return (analyzer != null) ? analyzer : defaultAnalyzer;
+	}
 
-
-
+	@Override
+	public String toString() {
+		return "PerFieldAnalyzerWrapper(" + fieldAnalyzers + ", default=" + defaultAnalyzer + ")";
+	}
 }

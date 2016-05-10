@@ -15,8 +15,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.gson.Gson;
@@ -83,17 +83,7 @@ public class CellMLExtractor extends Extractor{
 		if (doc==null) return documentNode;
 			
 		CellMLModel model = doc.getModel ();
-		
-//		try {
-//			//TODO remove that!
-//			filePath = StringUtils.replace(filePath, "models.cellml.org", "184.169.251.126");			
-//			model = CellMLReader.loadFromURL(cLoader.getCellMLBootstrap(), filePath);
-//		} catch (RuntimeException rte) { 
-//			return documentNode;
-//		} 
-		
-		
-		//documentNode.setProperty(Property.CellML.VERSION, );		
+			
 		if (versionID!=null) documentNode.setProperty(Property.General.VERSIONID, versionID);
 		
 		
@@ -183,7 +173,7 @@ public class CellMLExtractor extends Extractor{
 				annotationIndex.add(resource, Property.General.URI, res);
 			}
 			//create a dynamic relationship based on the qualifier
-			annotationNode.createRelationshipTo(resource, DynamicRelationshipType.withName("isDescribedBy"));
+			annotationNode.createRelationshipTo(resource, RelationshipType.withName("isDescribedBy"));
 			resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO);
 		}
 		
@@ -209,9 +199,14 @@ public class CellMLExtractor extends Extractor{
 					CellMLComponent connectedComponent = connectedVar.getComponent();
 					
 					if (var.getPrivateInterface() == CellMLVariable.INTERFACE_IN) {
-						in  = componentNodes.get(comp.getName()).values().iterator().next().get(var.getName());
-						out = componentNodes.get(connectedComponent.getName()).values().iterator().next().get(connectedVar.getName()); 	
-						out.createRelationshipTo(in, CellmlRelTypes.IS_CONNECTED_TO).setProperty(Property.CellML.ISPRIVATECONNECTION, true);
+						try {
+							in  = componentNodes.get(comp.getName()).values().iterator().next().get(var.getName());
+							out = componentNodes.get(connectedComponent.getName()).values().iterator().next().get(connectedVar.getName()); 	
+							out.createRelationshipTo(in, CellmlRelTypes.IS_CONNECTED_TO).setProperty(Property.CellML.ISPRIVATECONNECTION, true);
+						} catch (NullPointerException e) {
+							// nothing
+						}
+						
 					}										
 				}
 				

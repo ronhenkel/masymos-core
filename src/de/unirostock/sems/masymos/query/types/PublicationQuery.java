@@ -11,12 +11,11 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.util.Version;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 
-import de.unirostock.sems.masymos.analyzer.PublicationIndexAnalyzer;
+import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.data.PersonWrapper;
@@ -29,7 +28,7 @@ import de.unirostock.sems.masymos.query.results.PublicationResultSet;
 
 public class PublicationQuery implements IQueryInterface {
 
-	private final Analyzer analyzer = PublicationIndexAnalyzer.getPublicationIndexAnalyzer();
+	private final Analyzer analyzer = AnalyzerHandler.getPublicationindexanalyzer();
 	private final Index<Node> index = Manager.instance().getPublicationIndex();
 	private final String[] indexedFields = {Property.Publication.ABSTRACT,
 											Property.Publication.AFFILIATION, Property.Publication.AUTHOR, 

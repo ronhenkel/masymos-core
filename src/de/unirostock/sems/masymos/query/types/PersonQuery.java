@@ -15,7 +15,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 
-import de.unirostock.sems.masymos.analyzer.PersonIndexAnalyzer;
+import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
@@ -27,7 +27,7 @@ import de.unirostock.sems.masymos.query.results.PersonResultSet;
 
 public class PersonQuery implements IQueryInterface{
 
-	private final Analyzer analyzer = PersonIndexAnalyzer.getPersonIndexAnalyzer();
+	private final Analyzer analyzer = AnalyzerHandler.getPersonindexanalyzer();
 	private final Index<Node> index = Manager.instance().getPersonIndex();
 	private final String[] indexedFields = {	Property.Person.FAMILYNAME,
 												Property.Person.GIVENNAME,

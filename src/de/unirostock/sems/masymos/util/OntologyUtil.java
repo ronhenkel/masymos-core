@@ -5,7 +5,7 @@ package de.unirostock.sems.masymos.util;
 import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
@@ -23,7 +23,7 @@ public class OntologyUtil {
 	public static Node getNodeById(String ontologyPrefix, String id) {
 		Result result;
 		Node n = null;
-		try(Transaction tx = Manager.instance().createNewTransaction()){
+		try(Transaction tx = Manager.instance().getDatabase().beginTx()){
 			result = graphDB.execute("match (s1:"+ ontologyPrefix +"Ontology)"+
 					"where (s1.id='"+id+"')" +
 					"return s1 limit 1");
@@ -39,9 +39,9 @@ public class OntologyUtil {
 	
 	public static Integer getShortestPathLength(Node n1, Node n2){
 		int length = -1;
-		try(Transaction tx = Manager.instance().createNewTransaction()){
+		try(Transaction tx = Manager.instance().getDatabase().beginTx()){
 		PathFinder<Path> finder = GraphAlgoFactory.shortestPath(
-				PathExpanders.forTypeAndDirection( DynamicRelationshipType.withName("isA"), Direction.BOTH), 15 );
+				PathExpanders.forTypeAndDirection( RelationshipType.withName("isA"), Direction.BOTH), 15 );
 	        Path path = finder.findSinglePath( n1, n2 );
 	        length = path.length();
 		 tx.success();
@@ -51,9 +51,9 @@ public class OntologyUtil {
 	
 	public static Integer getDepth(Node concept, Node root){
 		Integer length = new Integer(-1);
-		try(Transaction tx = Manager.instance().createNewTransaction()){
+		try(Transaction tx = Manager.instance().getDatabase().beginTx()){
 		PathFinder<Path> finder = GraphAlgoFactory.shortestPath(
-				PathExpanders.forTypeAndDirection( DynamicRelationshipType.withName("isA"), Direction.OUTGOING), 15 );
+				PathExpanders.forTypeAndDirection( RelationshipType.withName("isA"), Direction.OUTGOING), 15 );
 	        Path path = finder.findSinglePath(concept, root);
 	        if (path!=null) length = new Integer(path.length());
 		 tx.success();
@@ -79,7 +79,7 @@ public class OntologyUtil {
 	public static Node getLca(String ontologyPrefix, Node concept1, Node concept2) {
 		Node lca = null;
 		Result result;
-		try(Transaction tx = Manager.instance().createNewTransaction()){
+		try(Transaction tx = Manager.instance().getDatabase().beginTx()){
 			String idC1 = (String) concept1.getProperty("id");
 			String idC2 = (String) concept2.getProperty("id");
 			
@@ -97,7 +97,7 @@ public class OntologyUtil {
 	public static Node getRoot(String ontologyPrefix){
 		Node root = null;
 		Result result;
-		try(Transaction tx = Manager.instance().createNewTransaction()){
+		try(Transaction tx = Manager.instance().getDatabase().beginTx()){
 			result = graphDB.execute("match (o:" + ontologyPrefix + "Ontology) where (o.id='owl:" + ontologyPrefix + "Ontology') return o");
 			ResourceIterator<Node> iRoot = result.columnAs("o");
 			root = iRoot.next();

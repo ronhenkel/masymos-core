@@ -15,7 +15,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 
-import de.unirostock.sems.masymos.analyzer.SedmlndexAnalyzer;
+import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
@@ -27,7 +27,7 @@ import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 public class SedmlQuery implements IQueryInterface {
 	
-	private final Analyzer analyzer = SedmlndexAnalyzer.getSedmlFullIndexAnalyzer();
+	private final Analyzer analyzer = AnalyzerHandler.getSedmlindexanalyzer();
 	private final Index<Node> index = Manager.instance().getSedmlIndex();
 	private final String[] indexedFields = { Property.SEDML.NAME, Property.SEDML.MODELSOURCE,
 											Property.SEDML.OUTPUT_TYPE, Property.SEDML.DATALABEL,

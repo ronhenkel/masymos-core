@@ -15,7 +15,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 
-import de.unirostock.sems.masymos.analyzer.ModelIndexAnalyzer;
+import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
@@ -25,7 +25,7 @@ import de.unirostock.sems.masymos.query.enumerator.CellMLModelFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 
 public class CellMLModelQuery implements IQueryInterface {
-	private final Analyzer analyzer = ModelIndexAnalyzer.getModelIndexAnalyzer();
+	private final Analyzer analyzer = AnalyzerHandler.getModelindexanalyzer();
 	private final Index<Node> index = Manager.instance().getModelIndex();
 	private final String[] indexedFields = {	Property.General.ID,  	
 												Property.General.NAME,

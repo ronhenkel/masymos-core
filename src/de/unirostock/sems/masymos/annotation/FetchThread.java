@@ -21,6 +21,8 @@ import org.neo4j.graphdb.index.Index;
 
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
+import de.unirostock.sems.masymos.database.traverse.DBModelTraverser;
+import de.unirostock.sems.masymos.util.IndexText;
 
 public class FetchThread extends Thread {
 
@@ -43,7 +45,7 @@ public class FetchThread extends Thread {
 
 	@Override
 	public void run() {
-		if (StringUtils.isEmpty(url))
+		if (StringUtils.isBlank(url))
 			return;
 		String text = null;
 
@@ -72,36 +74,39 @@ public class FetchThread extends Thread {
 			IOUtils.closeQuietly(stream);
 		}
 
-		if (StringUtils.isEmpty(text)) return;
-
+		if (StringUtils.isBlank(text)) return; 
 		
+		try {
+			text = IndexText.shrinkTextToLuceneTermLength(text);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			return;
+		}
 
 		try (Transaction tx = graphDB.beginTx()) 
 		{
-			Node resource = annoFull.get(Property.General.URI, uri).getSingle();
+			Node resource = annoFull.get(Property.General.URI,uri).getSingle();
+			if (resource==null) {
+				resource = DBModelTraverser.findSingleResourceNodeByURI(uri);
+				if (resource==null) throw new NoSuchElementException("URI is not in the index nor in the database");
+				annoFull.add(resource, Property.General.URI, uri);
+				System.out.println("Thread #" + number + ": No node found in index, added " + uri);
+			}
+		
 			annoFull.add(resource, Property.General.RESOURCETEXT, text);
-			resource.setProperty(Property.General.IS_INDEXED, true);
-			tx.success();
+			resource.setProperty(Property.General.IS_INDEXED, true);				
 
+			tx.success();
+			
 		} catch (NoSuchElementException e) {
-			System.out.println("Thread #" + number + ": Thread " + url
-					+ " FAILED!");
+			System.err.println("Thread #" + number + ": Thread " + url
+					+ " FAILED - multiple entries with same URI!");
 			System.out.println(e.getMessage());
 		} finally {
 		
 			System.out.println("Thread #" + number + ": " + url
 					+ " terminated at " + dateFormat.format(new Date()));
 		}
-
-		// try {
-		//
-		// BufferedWriter w = new BufferedWriter(new FileWriter("d:/temp/dump/"+
-		// URLEncoder.encode(url, "UTF-8")+".txt"));
-		// w.append(textBuffer.toString());
-		// w.close();
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
 	}
 
 }

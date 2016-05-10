@@ -22,7 +22,7 @@ public class QueryAdapter {
 
 	
 	public static List<ModelResultSet> executeSingleQueryForModels(IQueryInterface iq){
-		Transaction tx = Manager.instance().createNewTransaction();
+		Transaction tx = Manager.instance().getDatabase().beginTx();
 		try
 		{
 			return iq.getModelResults();
@@ -37,7 +37,7 @@ public class QueryAdapter {
 	}
 	
 	public static List<AnnotationResultSet> executeAnnotationQuery(AnnotationQuery aq){
-		Transaction tx = Manager.instance().createNewTransaction();
+		Transaction tx = Manager.instance().getDatabase().beginTx();
 		try
 		{
 			return aq.getResults();
@@ -52,7 +52,7 @@ public class QueryAdapter {
 	}
 	
 	public static List<PersonResultSet> executePersonQuery(PersonQuery persq){
-		Transaction tx = Manager.instance().createNewTransaction();
+		Transaction tx = Manager.instance().getDatabase().beginTx();
 		try
 		{
 			return persq.getResults();
@@ -67,7 +67,7 @@ public class QueryAdapter {
 	}
 	
 	public static List<PublicationResultSet> executePublicationQuery(PublicationQuery pubq){
-		Transaction tx = Manager.instance().createNewTransaction();
+		Transaction tx = Manager.instance().getDatabase().beginTx();
 		try
 		{
 			return pubq.getResults();
@@ -86,7 +86,7 @@ public class QueryAdapter {
 		List<ModelResultSet> rs = new LinkedList<ModelResultSet>();
 		for (Iterator<IQueryInterface> iqIt = iqList.iterator(); iqIt.hasNext();) {
 			IQueryInterface interfaceQuery = (IQueryInterface) iqIt.next();	
-			Transaction tx = Manager.instance().createNewTransaction();
+			Transaction tx = Manager.instance().getDatabase().beginTx();
 			try
 			{
 				rs.addAll(interfaceQuery.getModelResults());
@@ -104,7 +104,7 @@ public class QueryAdapter {
 	}
 	
 	public static List<SedmlResultSet> executeSedmlQuery(SedmlQuery sedq){
-		Transaction tx = Manager.instance().createNewTransaction();
+		Transaction tx = Manager.instance().getDatabase().beginTx();
 		try
 		{
 			return sedq.getResults();
@@ -120,7 +120,7 @@ public class QueryAdapter {
 	}
 	
 	public static List<ModelResultSet> executeSedmlQueryForModels(SedmlQuery sedq){
-		Transaction tx = Manager.instance().createNewTransaction();
+		Transaction tx = Manager.instance().getDatabase().beginTx();
 		try
 		{
 			return sedq.getModelResults();
@@ -131,41 +131,7 @@ public class QueryAdapter {
 			tx.success();
 
 		}
-		
-		
+				
 	}
 
-/*
-	private static Analyzer selectAnalyzerByEnum(IndexEnumerator e) {
-		switch (e) {
-		case MODELINDEX:
-			return NodeFullTextIndexAnalyzer.getNodeFullTextIndexAnalyzer();
-		case ANNOTATIONINDEX:
-			return AnnotationIndexAnalyzer.getAnnotationIndexAnalyzer();
-		case PUBLICATIONINDEX:
-			return PublicationFullTextIndexAnalyzer.getPublicationFullTextIndexAnalyzer();
-		case PERSONINDEX:
-			return PersonExactIndexAnalyzer.getPersonExactIndexAnalyzer();	
-		default:
-			return null;
-		}
-	}
-
-	private static Index<Node> selectIndexByEnum(IndexEnumerator e){
-		switch (e) {
-		case MODELINDEX:
-			return nodeIndex;
-		case ANNOTATIONINDEX:
-			return annotationFull;
-		case PUBLICATIONINDEX:
-			return publicationFull;
-		case PERSONINDEX:
-			return personExact;	
-		default:
-			return null;
-		}
-
-	}
-
-*/	
 }

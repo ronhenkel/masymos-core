@@ -16,7 +16,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 
-import de.unirostock.sems.masymos.analyzer.AnnotationIndexAnalyzer;
+import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
@@ -27,7 +27,7 @@ import de.unirostock.sems.masymos.query.results.AnnotationResultSet;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 
 public class AnnotationQuery implements IQueryInterface {
-	private final Analyzer analyzer = AnnotationIndexAnalyzer.getAnnotationIndexAnalyzer();
+	private final Analyzer analyzer = AnalyzerHandler.getAnnotationindexanalyzer();
 	private final Index<Node> index = Manager.instance().getAnnotationIndex();
 	private final String[] indexedFields = {	Property.General.URI, 
 												Property.General.NONRDF, 

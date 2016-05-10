@@ -1,9 +1,11 @@
 package de.unirostock.sems.masymos.extractor.Owl;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 
-import org.neo4j.graphdb.DynamicRelationshipType;
+import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLClass;
@@ -30,7 +32,8 @@ public class Ontology {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology o;
 		try {
-			o = manager.loadOntologyFromOntologyDocument(file);
+			//o = manager.loadOntologyFromOntologyDocument(file);//
+			o = manager.loadOntologyFromOntologyDocument( new ByteArrayInputStream(FileUtils.readFileToByteArray(file)));
 			if (o!=null) importOntology(o,ontologyName);
 		} catch (OWLOntologyCreationException e) {
 
@@ -58,7 +61,7 @@ public class Ontology {
 		}
 
 		Node thingNode = null;
-		try (Transaction tx = Manager.instance().createNewTransaction()) {
+		try (Transaction tx = Manager.instance().getDatabase().beginTx()) {
 
 			thingNode = getOrCreateNodeWithUniqueFactory("owl:" + ontologyName, ontologyName );
 			tx.success();
@@ -74,7 +77,7 @@ public class Ontology {
 			if ((counter % 50) == 0)System.out.println("..." + counter + " of " + classSize);
 			counter++;
 
-			try (Transaction tx = Manager.instance().createNewTransaction()) {
+			try (Transaction tx = Manager.instance().getDatabase().beginTx()) {
 
 				String classString = c.toString();
 				if (classString.contains("#")) {
@@ -88,7 +91,7 @@ public class Ontology {
 
 				if (superclasses.isEmpty()) {
 					classNode.createRelationshipTo(thingNode,
-							DynamicRelationshipType.withName("isA"));
+							RelationshipType.withName("isA"));
 				} else {
 					for (org.semanticweb.owlapi.reasoner.Node<OWLClass> parentOWLNode : superclasses) {
 						if (parentOWLNode.getSize()==0) continue;
@@ -102,7 +105,7 @@ public class Ontology {
 						}
 						Node parentNode = getOrCreateNodeWithUniqueFactory(parentString, ontologyName);
 						classNode.createRelationshipTo(parentNode,
-								DynamicRelationshipType.withName("isA"));
+								RelationshipType.withName("isA"));
 					}
 				}
 
@@ -118,7 +121,7 @@ public class Ontology {
 					Node individualNode = getOrCreateNodeWithUniqueFactory(indString, ontologyName);
 
 					individualNode.createRelationshipTo(classNode,
-							DynamicRelationshipType.withName("isA"));
+							RelationshipType.withName("isA"));
 
 					for (OWLObjectPropertyExpression objectProperty : ontology
 							.getObjectPropertiesInSignature()) {
@@ -136,7 +139,7 @@ public class Ontology {
 									s.lastIndexOf(">"));
 							Node objectNode = getOrCreateNodeWithUniqueFactory(s, ontologyName);
 							individualNode.createRelationshipTo(objectNode,
-									DynamicRelationshipType.withName(reltype));
+									RelationshipType.withName(reltype));
 						}
 					}
 

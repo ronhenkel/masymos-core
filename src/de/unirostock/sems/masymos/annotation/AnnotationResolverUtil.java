@@ -77,7 +77,7 @@ public class AnnotationResolverUtil {
 		List<Node> nodes = DBModelTraverser.getAllNodesWithLabel(NodeLabel.Types.RESOURCE); 
 		List<String> uriList = new LinkedList<String>();
 		
-		try (Transaction tx = Manager.instance().createNewTransaction())
+		try (Transaction tx = Manager.instance().getDatabase().beginTx())
 		{
 			for (Iterator<Node> nodeIt = nodes.iterator(); nodeIt.hasNext();) {
 				Node node = (Node) nodeIt.next();				
@@ -96,7 +96,7 @@ public class AnnotationResolverUtil {
 				uriThreadPool.execute(rt);										
 			}
 			
-			System.out.println("Started to resolve " + uriCounter + "URIs...");		
+			System.out.println("Started to resolve " + uriCounter + " URIs...");		
 	
 			uriThreadPool.shutdown();
 			// Wait until all threads are finish
@@ -111,7 +111,7 @@ public class AnnotationResolverUtil {
 			
 			System.out.println("done!");		
 			
-			System.out.println("Started to retrieve " + urlCount + "URLs...");
+			System.out.println("Started to retrieve " + urlCount + " URLs...");
 					
 	
 			urlThreadPool.shutdown();
@@ -131,7 +131,6 @@ public class AnnotationResolverUtil {
 	public synchronized void  addToUrlThreadPool(String uri, String url){		
 		FetchThread ft = new FetchThread(uri, url, urlCount.getAndIncrement());
 		ft.setName(url);
-		//Runtime.getRuntime().addShutdownHook(ft);
 		urlThreadPool.execute(ft);
 	}
 

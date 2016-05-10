@@ -10,8 +10,8 @@ import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.sbml.jsbml.Annotation;
 import org.sbml.jsbml.CVTerm;
@@ -121,40 +121,6 @@ public class SBMLExtractor extends Extractor{
 					Creator creator = (Creator) iterator.next();
 					PersonWrapper person = new PersonWrapper(creator.getFamilyName(), creator.getGivenName(), creator.getEmail(), creator.getOrganization());
 					processPerson(person, modelNode, annotationNode, Relation.DocumentRelTypes.IS_CREATOR);
-// the following was out-sourced					
-//					try {
-//						PersonQuery pq = new PersonQuery();
-//						pq.addQueryClause(PersonFieldEnumerator.FAMILYNAME, creator.getFamilyName());
-//						pq.addQueryClause(PersonFieldEnumerator.GIVENNAME, creator.getGivenName());
-//						//pq.addQueryClause(PersonFieldEnumerator.ORGANIZATION, creator.getOrganization());
-//						personNode = personIndex.query(pq.getQuery()).getSingle();
-//					} catch (NoSuchElementException  e) {
-//						personNode = null;
-//					}					
-//					//create a node for each creator & link persons between models
-//					if (personNode==null){
-//						personNode= graphDB.createNode();
-//						personNode.setProperty(Property.General.NODETYPE, Property.NodeType.PERSON);
-//						personNode.setProperty(Property.Person.GIVENNAME, creator.getGivenName());
-//						personNode.setProperty(Property.Person.FAMILYNAME, creator.getFamilyName());
-//						//add to person index
-//						personIndex.add(personNode, Property.Person.FAMILYNAME, creator.getFamilyName());
-//						personIndex.add(personNode, Property.Person.GIVENNAME, creator.getGivenName());
-//						personIndex.add(personNode, Property.Person.ORGANIZATION, creator.getOrganization());
-//	
-//						//add to node index
-//						modelIndex.add(modelNode, Property.General.CREATOR, creator.getGivenName());
-//						modelIndex.add(modelNode, Property.General.CREATOR, creator.getFamilyName());
-//					}
-//					//set Email in case Person originates form a publication
-//					if (!personNode.hasProperty(Property.Person.EMAIL)){
-//						personNode.setProperty(Property.Person.EMAIL, creator.getEmail());
-//						modelIndex.add(modelNode, Property.General.EMAIL, creator.getEmail());
-//						personIndex.add(personNode, Property.Person.EMAIL, creator.getEmail());
-//					}
-//					//set relationships
-//					personNode.createRelationshipTo(annotationNode, Relation.DatabaseRelTypes.BELONGS_TO);
-//					annotationNode.createRelationshipTo(personNode, Relation.SbmlRelTypes.IS_CREATOR);
 				}
 				
 			}	
@@ -197,7 +163,7 @@ public class SBMLExtractor extends Extractor{
 					annotationIndex.add(resource, Property.General.URI, res);
 				}
 				//create a dynamic relationship based on the qualifier
-				annotationNode.createRelationshipTo(resource, DynamicRelationshipType.withName(q.getElementNameEquivalent()));
+				annotationNode.createRelationshipTo(resource, RelationshipType.withName(q.getElementNameEquivalent()));
 				resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO);
 			}
 		}

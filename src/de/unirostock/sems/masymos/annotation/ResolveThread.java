@@ -19,15 +19,18 @@ public class ResolveThread extends Thread {
 	@Override
 	public void run() {
 		String[] res = {};
-		String oldUri = uri;
+		String originalURI = uri;
 		try {
 			MiriamLink link = new MiriamLink();
 			link.setAddress("http://www.ebi.ac.uk/miriamws/main/MiriamWebServices");
 			if (StringUtils.startsWith(uri, "http")) {
 				uri = link.convertURL(uri);
-				System.out.println("Identifier.org URL " + oldUri + " mapped to Miriam URN " + uri);
+				System.out.println("Identifier.org URL " + originalURI + " mapped to Miriam URN " + uri);
 			}
-			
+			if (StringUtils.isBlank(uri)) {
+				uri = link.getMiriamURI(originalURI);
+				System.out.println("Retrieving equivalent for invalid " + originalURI +" --> " + uri);
+			}
 			res = link.getLocations(uri); 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -36,11 +39,11 @@ public class ResolveThread extends Thread {
 			System.out.println("Miriam request #" + number +" returned no results for " + uri);
 			return;
 		}
-		System.out.println("Miriam request #" + number +" returned " + res.length + "results for " + uri);
+		System.out.println("Miriam request #" + number +" returned " + res.length + " results for " + uri);
 		
 		for (int i = 0; i < res.length; i++) {
 			//TODO this oldURI is a hack until Identifiers.org provides a proper interface
-			AnnotationResolverUtil.instance().addToUrlThreadPool(oldUri, res[i]);
+			AnnotationResolverUtil.instance().addToUrlThreadPool(originalURI, res[i]);
 		}
 		
 		System.out.println("Miriam request #" + number +" finished");
