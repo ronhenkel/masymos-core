@@ -3,8 +3,8 @@ package de.unirostock.sems.masymos.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.UniqueFactory;
@@ -54,7 +54,7 @@ public class OntologyFactory {
 				protected void initialize( Node created, Map<String, Object> properties )
 				{
 					created.setProperty( "id", properties.get( "id" ) );
-					created.addLabel(DynamicLabel.label(indexChebi));
+					created.addLabel(Label.label(indexChebi));
 				}
 			};
 		}
@@ -73,7 +73,7 @@ public class OntologyFactory {
 				protected void initialize( Node created, Map<String, Object> properties )
 				{
 					created.setProperty( "id", properties.get( "id" ) );
-					created.addLabel(DynamicLabel.label(indexSBO));
+					created.addLabel(Label.label(indexSBO));
 				}
 			};
 		}
@@ -93,7 +93,7 @@ public class OntologyFactory {
 				protected void initialize( Node created, Map<String, Object> properties )
 				{
 					created.setProperty( "id", properties.get( "id" ) );
-					created.addLabel(DynamicLabel.label(indexGO));
+					created.addLabel(Label.label(indexGO));
 				}
 			};
 		}
@@ -113,7 +113,7 @@ public class OntologyFactory {
 				protected void initialize( Node created, Map<String, Object> properties )
 				{
 					created.setProperty( "id", properties.get( "id" ) );
-					created.addLabel(DynamicLabel.label(indexKISAO));
+					created.addLabel(Label.label(indexKISAO));
 				}
 			};
 		}
@@ -165,7 +165,7 @@ public class OntologyFactory {
 		@Override
 		protected void initialize(Node created, Map<String, Object> properties) {
 			created.setProperty( "id", properties.get( "id" ) );
-			created.addLabel( DynamicLabel.label(this.indexName) );
+			created.addLabel( Label.label(this.indexName) );
 		}
 		
 	}

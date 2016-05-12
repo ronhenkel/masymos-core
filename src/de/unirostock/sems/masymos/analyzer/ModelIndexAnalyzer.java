@@ -1,36 +1,49 @@
 package de.unirostock.sems.masymos.analyzer;
 
-import java.io.Reader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
-import org.apache.lucene.analysis.SimpleAnalyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.util.Version;
+import org.apache.lucene.analysis.DelegatingAnalyzerWrapper;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import de.unirostock.sems.masymos.configuration.Property;
 
-public class ModelIndexAnalyzer extends Analyzer{
-	
+public class ModelIndexAnalyzer extends DelegatingAnalyzerWrapper {
 
-	protected final static PerFieldAnalyzerWrapper modelIndexAnalyzer =  createModelIndexAnalyzer();
-	private final static PerFieldAnalyzerWrapper createModelIndexAnalyzer() {
+	private final Analyzer defaultAnalyzer;
+	private final Map<String, Analyzer> fieldAnalyzers;
+
+	public ModelIndexAnalyzer(Analyzer defaultAnalyzer) {
+		this(defaultAnalyzer, null);
+	}
+
+	public ModelIndexAnalyzer(Analyzer defaultAnalyzer, Map<String, Analyzer> fieldAnalyzers) {
+		super(PER_FIELD_REUSE_STRATEGY);
+		this.defaultAnalyzer = defaultAnalyzer;
+		this.fieldAnalyzers = (fieldAnalyzers != null) ? fieldAnalyzers : Collections.<String, Analyzer> emptyMap();
+	}
+	
+	public ModelIndexAnalyzer() {
+		super(PER_FIELD_REUSE_STRATEGY);
 		Map<String, Analyzer> map = new HashMap<String, Analyzer>();
-		map.put(Property.General.URI, new LowerCaseKeywordAnalyzer());		
-		map.put(Property.General.ID, new LowerCaseKeywordAnalyzer());	
-		return new PerFieldAnalyzerWrapper(new SimpleAnalyzer(Version.LUCENE_36), map);
-		//return new PerFieldAnalyzerWrapper(new StandardAnalyzer(Version.LUCENE_35), map);
-	}
-	
-	@Override
-	public TokenStream tokenStream(String fieldName, Reader reader) {
-		return modelIndexAnalyzer.tokenStream(fieldName, reader);
+		map.put(Property.General.URI, AnalyzerHandler.getLowercasekeywordanalyzer());
+		map.put(Property.General.ID, AnalyzerHandler.getLowercasekeywordanalyzer());
+		this.defaultAnalyzer = new StandardAnalyzer();
+		this.fieldAnalyzers = map;
+		
 	}
 
-	public static PerFieldAnalyzerWrapper getModelIndexAnalyzer() {
-		return modelIndexAnalyzer;
+	@Override
+	protected Analyzer getWrappedAnalyzer(String fieldName) {
+		Analyzer analyzer = fieldAnalyzers.get(fieldName);
+		return (analyzer != null) ? analyzer : defaultAnalyzer;
+	}
+
+	@Override
+	public String toString() {
+		return "PerFieldAnalyzerWrapper(" + fieldAnalyzers + ", default=" + defaultAnalyzer + ")";
 	}
 
 }

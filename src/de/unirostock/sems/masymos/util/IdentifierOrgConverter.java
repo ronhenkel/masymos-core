@@ -6,7 +6,7 @@ import uk.ac.ebi.miriam.lib.MiriamLink;
 
 
 public class IdentifierOrgConverter {
-	
+/*	
 	public static String convertFromIdentifierOrgToMiriam(String uri){
 		String oldUri = uri;
 		try {
@@ -36,5 +36,5 @@ public class IdentifierOrgConverter {
 		if (StringUtils.isEmpty(uri)) uri = oldUri;
 		return uri;				
 	}
-
+*/
 }

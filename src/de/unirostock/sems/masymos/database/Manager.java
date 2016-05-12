@@ -37,7 +37,8 @@ public class Manager {
 	private Index<Node> sedmlIndex = null;
 //	private ReadableIndex<Node> autoNodeIndex = null;
 	
-	private Map<String, ReadableIndex<?>> indexMap = null; 
+	private Map<String, ReadableIndex<?>> nodeIndexMap = null; 
+	private Map<String, ReadableIndex<?>> relationshipIndexMap = null;
 
 	private Manager(){
 		if (Config.instance().isWebSeverInstance()){
@@ -59,44 +60,34 @@ public class Manager {
 
 	private void initializeManager(GraphDatabaseService serverDB) {		
 		graphDb = serverDB;
-		//set auto-index properties
-		//...think about it...
 	}
 	
 	private void initializeIndex() {
 				
 		try (Transaction tx = graphDb.beginTx())
 		{
-
 			modelIndex = graphDb.index().forNodes("modelIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", ModelIndexAnalyzer.class.getName()));
 			constituentIndex = graphDb.index().forNodes("constituentIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", ConstituentIndexAnalyzer.class.getName()));
-			relationshipIndex = graphDb.index().forRelationships("relationshipIndex");
 			annotationIndex = graphDb.index().forNodes("annotationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", AnnotationIndexAnalyzer.class.getName()));	
 			publicationIndex = graphDb.index().forNodes("publicationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", PublicationIndexAnalyzer.class.getName()));
 			personIndex = graphDb.index().forNodes("personIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", PersonIndexAnalyzer.class.getName()));
 			sedmlIndex = graphDb.index().forNodes("sedmlIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", SedmlndexAnalyzer.class.getName()));
-//			autoNodeIndex = graphDb.index().getNodeAutoIndexer().getAutoIndex();
 			
-			//((LuceneIndex<Node>) modelIndex).setCacheCapacity( Property.General.NAME, 3000 );
-			//((LuceneIndex<Node>) modelIndex).setCacheCapacity( Property.General.ID, 3000 );
-			//((LuceneIndex<Node>) annotationIndex).setCacheCapacity( Property.General.URI, 30000 );
-			//((LuceneIndex<Node>) personIndex).setCacheCapacity( Property.Person.FAMILYNAME, 1000 );
-			//((LuceneIndex<Node>) personIndex).setCacheCapacity( Property.Person.GIVENNAME, 1000 );
-			//((LuceneIndex<Node>) publicationIndex).setCacheCapacity( Property.Publication.ABSTRACT, 1000 );
-			//((LuceneIndex<Node>) publicationIndex).setCacheCapacity( Property.Publication.TITLE, 1000 );
+			relationshipIndex = graphDb.index().forRelationships("relationshipIndex");
 			
 			tx.success();
 		}
 		
-		indexMap = new HashMap<String, ReadableIndex<?>>();
-		indexMap.put("modelIndex", modelIndex);
-		indexMap.put("constituentIndex", constituentIndex);
-		indexMap.put("relationshipIndex", publicationIndex);
-		indexMap.put("annotationIndex", annotationIndex);
-		indexMap.put("publicationIndex", publicationIndex);
-		indexMap.put("personIndex", personIndex);
-		indexMap.put("sedmlIndex", sedmlIndex);
-//		indexMap.put("autoNodeIndex", autoNodeIndex);
+		nodeIndexMap = new HashMap<String, ReadableIndex<?>>();
+		nodeIndexMap.put("modelIndex", modelIndex);
+		nodeIndexMap.put("constituentIndex", constituentIndex);
+		nodeIndexMap.put("annotationIndex", annotationIndex);
+		nodeIndexMap.put("publicationIndex", publicationIndex);
+		nodeIndexMap.put("personIndex", personIndex);
+		nodeIndexMap.put("sedmlIndex", sedmlIndex);
+
+		relationshipIndexMap = new HashMap<String, ReadableIndex<?>>();
+		relationshipIndexMap.put("relationshipIndex", relationshipIndex);
 	}
 	
 
@@ -110,14 +101,6 @@ public class Manager {
 	public GraphDatabaseService  getDatabase(){
 		return graphDb;
 	}
-
-/*	
-	public ExecutionEngine  getExecutionEngine(){
-		//lazy initialization
-		if (this.engine==null) this.engine = new ExecutionEngine(graphDb);
-		return engine;
-	}
-*/	
 
 	public Index<Node> getModelIndex() {
 		return modelIndex;
@@ -152,11 +135,6 @@ public class Manager {
 		return sedmlIndex;
 	}
 
-//	public ReadableIndex<Node> getAutoNodeIndex() {
-//		return autoNodeIndex;
-//	}
-
-
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}
@@ -177,11 +155,7 @@ public class Manager {
 	}
 
 	public Map<String, ReadableIndex<?>> getIndexMap() {
-		return indexMap;
-	}
-	
-	public Transaction createNewTransaction() {
-		return graphDb.beginTx();
+		return nodeIndexMap;
 	}
 
 }

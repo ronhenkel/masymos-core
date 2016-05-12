@@ -8,6 +8,7 @@ import java.util.List;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.MultipleFoundException;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -131,7 +132,7 @@ public class DBModelTraverser {
 	
 	public static List<Node> getAllNodesWithLabel(Label label){
 		List<Node> nodes = new LinkedList<Node>();		
-		try (Transaction tx = Manager.instance().createNewTransaction())
+		try (Transaction tx = Manager.instance().getDatabase().beginTx())
 		{
 			for (ResourceIterator<Node> resourceNodeListIterator = Manager.instance().getDatabase().findNodes(label); resourceNodeListIterator.hasNext();) {
 				nodes.add( (Node) resourceNodeListIterator.next());			
@@ -139,10 +140,18 @@ public class DBModelTraverser {
 			
 			tx.success();
 		}
-
 		return nodes;
 	}
 
+	public static Node findSingleResourceNodeByURI(String uri) {
+		Node node = null;
+		try {
+			node = Manager.instance().getDatabase().findNode(NodeLabel.Types.RESOURCE, Property.General.URI, uri);
+		} catch (MultipleFoundException e) {
+			return null;
+		}
+		return node;
+	}
 
 
 

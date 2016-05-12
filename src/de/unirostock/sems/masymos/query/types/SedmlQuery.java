@@ -1,7 +1,5 @@
 package de.unirostock.sems.masymos.query.types;
 
-import org.apache.lucene.queryParser.ParseException;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -10,14 +8,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.util.Version;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 
-import de.unirostock.sems.masymos.analyzer.SedmlndexAnalyzer;
+import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
@@ -29,7 +27,7 @@ import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 public class SedmlQuery implements IQueryInterface {
 	
-	private final Analyzer analyzer = SedmlndexAnalyzer.getSedmlFullIndexAnalyzer();
+	private final Analyzer analyzer = AnalyzerHandler.getSedmlindexanalyzer();
 	private final Index<Node> index = Manager.instance().getSedmlIndex();
 	private final String[] indexedFields = { Property.SEDML.NAME, Property.SEDML.MODELSOURCE,
 											Property.SEDML.OUTPUT_TYPE, Property.SEDML.DATALABEL,
@@ -121,7 +119,7 @@ public class SedmlQuery implements IQueryInterface {
 
 			}
 		}		
-		QueryParser qp = new QueryParser(Version.LUCENE_31, Property.SEDML.MODELSOURCE, analyzer);		 
+		QueryParser qp = new QueryParser(Property.SEDML.MODELSOURCE, analyzer);		 
 		return qp.parse(q.toString());		
 	}
 	
