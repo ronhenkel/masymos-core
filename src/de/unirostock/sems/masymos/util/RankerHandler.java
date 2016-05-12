@@ -8,9 +8,9 @@ import java.util.List;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 
 public class RankerHandler {
-	private LinkedHashMap<String, ModelResultSet> rankerMap;
-	private LinkedHashMap<String, Integer> modelIDRankingMap;
-	private ArrayList<String> modelIDList;
+	private LinkedHashMap<String, ModelResultSet> rankerMap = new LinkedHashMap<String, ModelResultSet>();
+	private LinkedHashMap<String, Integer> modelIDRankingMap = new LinkedHashMap<String, Integer>();
+	private ArrayList<String> modelIDList = new ArrayList<String>();
 	
 	public ArrayList<String> getModelIDList(){
 		return this.modelIDList;
@@ -18,10 +18,6 @@ public class RankerHandler {
 	
 	
 	public RankerHandler(List<ModelResultSet> rankerList){
-		LinkedHashMap<String, ModelResultSet> rankerMap = new LinkedHashMap<String, ModelResultSet>();
-		LinkedHashMap<String, Integer> modelIDRankingMap = new LinkedHashMap<String, Integer>();
-		ArrayList<String> modelIDList = new ArrayList<String>();
-		
 		int count = 1;
 		
 		if(rankerList != null)
@@ -32,10 +28,6 @@ public class RankerHandler {
 				modelIDList.add(model.getModelID());
 				count++;
 			}
-		
-		this.rankerMap = rankerMap;
-		this.modelIDRankingMap = modelIDRankingMap;
-		this.modelIDList = modelIDList;
 	}
 	
 	
@@ -47,13 +39,14 @@ public class RankerHandler {
 	//returns the ranking of 'model' in 'ranker' if 'ranker' contains 'modelID' and -1 otherwise
 	public int getRankingByModelID(String modelID){
 		
-		if(modelIDRankingMap.get(modelID) != null)
+		if(modelIDRankingMap.containsKey(modelID))
 			return modelIDRankingMap.get(modelID);
 		else return -1;
 	}
 	
-	public boolean containsByModelID(String modelID){
-		if(modelIDRankingMap.get(modelID) != null)
+	
+	public boolean containsByModelID(String modelID){ 
+		if(modelIDRankingMap.containsKey(modelID))
 			return true;
 		else
 			return false;
@@ -62,7 +55,7 @@ public class RankerHandler {
 	
 	public float getScoreByModelID(String modelID){
 		
-		if(this.rankerMap.get(modelID) != null)
+		if(this.rankerMap.containsKey(modelID))
 			return this.rankerMap.get(modelID).getScore();
 		else 
 			return -1;
@@ -76,7 +69,7 @@ public class RankerHandler {
 	}
 	
 	
-	public void swap(String modelID1, String modelID2){
+	public void swap(String modelID1, String modelID2){ 
 		int rankingOfModel1 = this.modelIDRankingMap.get(modelID1);
 		int rankingOfModel2 = this.modelIDRankingMap.get(modelID2);
 	
@@ -87,12 +80,12 @@ public class RankerHandler {
 	}
 	
 	
-	public RankerHandler getDifferenceTo(RankerHandler r2){  //this / r2
+	public RankerHandler getDifferenceTo(RankerHandler r2){  //returns all the elements in 'this' but not in 'r2' {{this} - {r2}}
 		RankerHandler diff = new RankerHandler(null);
 		int count = 1;
 		
 		for(String modelId: this.modelIDList)
-			if (r2.containsByModelID(modelId)){  //if r2 doesn't contain model
+			if (r2.containsByModelID(modelId)){  //if r2 doesn't contain 'model'
 				ModelResultSet model = this.rankerMap.get(modelId);
 				ModelResultSet newModel = model.copyModelResultSet();
 				diff.rankerMap.put(model.getModelID(), newModel);
@@ -108,16 +101,10 @@ public class RankerHandler {
 	public List<ModelResultSet> makeResultsList(){
 		List<ModelResultSet> modelsList = new LinkedList<ModelResultSet>();
 		for(String modelID: modelIDList){
-			ModelResultSet model = this.rankerMap.get(modelID)/*.copyModelResultSet()*/;
+			ModelResultSet model = this.rankerMap.get(modelID);
 			modelsList.add(model);
 		}
 		return modelsList;
-	}
-	
-	
-	public RankerHandler copyRankerHandler(){
-		RankerHandler newRankerHandler = new RankerHandler(this.makeResultsList());
-		return newRankerHandler;
 	}
 	
 	

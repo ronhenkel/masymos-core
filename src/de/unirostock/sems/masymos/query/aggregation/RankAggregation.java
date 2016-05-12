@@ -146,7 +146,7 @@ public class RankAggregation {
 				if(ranking2OfModel1 > ranking2OfModel2)
 					sumOfDisagreements++;
 				}
-			sumOfDisagreements += diff.getRankingByModelID(modelID1);
+			sumOfDisagreements += diff.getRankingByModelID(modelID1) - 1;
 		}
 			
 		return sumOfDisagreements;	
@@ -166,9 +166,7 @@ public class RankAggregation {
 				else 
 					distanceToRankers[i]--;
 			}
-				//distanceToRankers[i] = optimisedDistance(aggregateRankerH, ranker_iH);
-			if ((! ranker_iH.containsByModelID(modelID1)) && ranker_iH.containsByModelID(modelID2))
-				distanceToRankers[i]++;
+			
 			sumDistance += distanceToRankers[i];
 		}
 		
@@ -181,10 +179,14 @@ public class RankAggregation {
 	private static List<ModelResultSet> optimisedAdj (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){ //adjacent pairs, based on Ke-tau
 		double epsilon_min = Integer.MAX_VALUE;
 		int count = 0;
-		//boolean changed = false;
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
 		double[] distanceToRankers = new double[4];
 		double[] tempDistanceToRankers = new double[4];
+		
+		for(int i = 0; i < 4; i++){
+			RankerHandler ranker_iH = rankersListH.get(i);
+			distanceToRankers[i] = optimisedDistance(aggregateRankerH, ranker_iH);
+		}
 		
 		while (count < 100){ //repeat for-loop until no further reductions can be performed
 			//changed = false;
