@@ -132,21 +132,29 @@ public class RankAggregation {
 		int ranking2OfModel2;
 		String modelID1;
 		String modelID2;
-		ArrayList<String> modelIDList = ranker_iH.getModelIDList();
-		RankerHandler diff = aggregateRankerH.getDifferenceTo(ranker_iH);
+		ArrayList<String> modelIDListR_i = ranker_iH.getModelIDList();
+		ArrayList<String> modelIDListRA = aggregateRankerH.getModelIDList();
+		
+		int sumOfModelsNotInR_i = 0;
+		
+		if (k > 0)
+			for(String modelID : modelIDListRA){
+				if (ranker_iH.containsByModelID(modelID))
+					sumOfDisagreements += sumOfModelsNotInR_i;
+				else sumOfModelsNotInR_i++;
+			}
 		
 		for(int i = 0; i < k; i++){
-			modelID1 = modelIDList.get(i);
+			modelID1 = modelIDListR_i.get(i);
 			
 			for(int j = i+1; j < k; j++){
-				modelID2 = modelIDList.get(j);
+				modelID2 = modelIDListR_i.get(j);
 				ranking2OfModel1 = aggregateRankerH.getRankingByModelID(modelID1);
 				ranking2OfModel2 = aggregateRankerH.getRankingByModelID(modelID2);
 				
 				if(ranking2OfModel1 > ranking2OfModel2)
 					sumOfDisagreements++;
 				}
-			sumOfDisagreements += diff.getRankingByModelID(modelID1) - 1;
 		}
 			
 		return sumOfDisagreements;	
@@ -160,12 +168,19 @@ public class RankAggregation {
 		
 		for(int i = 0; i < s; i++){
 			RankerHandler ranker_iH = rankersListH.get(i);
-			if (ranker_iH.containsByModelID(modelID1) && ranker_iH.containsByModelID(modelID2)){
-				if (ranker_iH.getRankingByModelID(modelID1) > ranker_iH.getRankingByModelID(modelID2))
-					distanceToRankers[i]++;
-				else 
-					distanceToRankers[i]--;
-			}
+			
+			int rankingOfModel1 = ranker_iH.getRankingByModelID(modelID1);
+			if(rankingOfModel1 == -1)
+				rankingOfModel1 = Integer.MAX_VALUE; 
+			
+			int rankingOfModel2 = ranker_iH.getRankingByModelID(modelID2);
+			if(rankingOfModel2 == -1)
+				rankingOfModel2 = Integer.MAX_VALUE; 
+			
+			if (rankingOfModel1 > rankingOfModel2)
+				distanceToRankers[i]++;
+			else 
+				distanceToRankers[i]--;
 			
 			sumDistance += distanceToRankers[i];
 		}
@@ -177,16 +192,19 @@ public class RankAggregation {
 	
 		
 	private static List<ModelResultSet> optimisedAdj (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){ //adjacent pairs, based on Ke-tau
-		double epsilon_min = Integer.MAX_VALUE;
+		double epsilon_min = 0;
 		int count = 0;
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
 		double[] distanceToRankers = new double[4];
 		double[] tempDistanceToRankers = new double[4];
 		
-		for(int i = 0; i < 4; i++){
+		for(int i = 0; i < rankersListH.size(); i++){
 			RankerHandler ranker_iH = rankersListH.get(i);
 			distanceToRankers[i] = optimisedDistance(aggregateRankerH, ranker_iH);
+			epsilon_min += distanceToRankers[i];
 		}
+		
+		epsilon_min = epsilon_min / rankersListH.size();
 		
 		while (count < 100){ //repeat for-loop until no further reductions can be performed
 			//changed = false;
@@ -220,8 +238,10 @@ public class RankAggregation {
 		return results;
 	}
 	
+	
 	private static List<ModelResultSet> combMNZ(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
 		int s = rankersListH.size();
+		float maxPossibleScore = s * s;
 		
 		for (String modelID : aggregateRankerH.getModelIDList()) {
 			int h = 0; //denotes the number of times model appears in the rankers
@@ -238,7 +258,8 @@ public class RankAggregation {
 			}
 
 			float newScore = brn_sum * h;
-			aggregateRankerH.updateScoreByModelID(modelID, newScore);
+			float scoreProcent = newScore / maxPossibleScore;
+			aggregateRankerH.updateScoreByModelID(modelID, scoreProcent);
 		}
 		
 		List<ModelResultSet> results = aggregateRankerH.makeResultsList();
@@ -253,8 +274,6 @@ public class RankAggregation {
 		int rankingOfModel1;
 		int rankingOfModel2;
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
-		
-		long startTime = System.currentTimeMillis();
 		
 		for(int i = 1; i < aggregateRankerLength; i++){
 			String modelID2 = modelIDList.get(i);
@@ -292,10 +311,6 @@ public class RankAggregation {
 					break;
 			}
 		}
-		
-		long stopTime = System.currentTimeMillis();
-	    long elapsedTime = stopTime - startTime;
-	    System.out.println(elapsedTime);
 		
 		//set new scores
 		aggregateRankerH.setScoresToNAN();
