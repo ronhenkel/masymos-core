@@ -5,15 +5,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.MultipleFoundException;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.ResourceIterator;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
 
@@ -25,7 +22,7 @@ import de.unirostock.sems.masymos.configuration.Relation.DocumentRelTypes;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 
-public class DBModelTraverser {
+public class ModelTraverser {
 
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 	
@@ -69,7 +66,7 @@ public class DBModelTraverser {
 		Traverser t = td.traverse(node);
 		for (Iterator<Path> it = t.iterator(); it.hasNext();) {
 			Node tNode = ((Path) it.next()).endNode();
-			modelList.add(tNode);
+			if (tNode.hasLabel(NodeLabel.Types.MODEL)) modelList.add(tNode);
 		}		
 		return modelList;
 	}
@@ -84,7 +81,7 @@ public class DBModelTraverser {
 		}		
 		return documentList;
 	}
-
+	
 	public static List<Node> getPersonFromPublication(Node publicationNode) {
 		LinkedList<Node> personList = new LinkedList<Node>();
 		Iterable<Relationship> ir = publicationNode.getRelationships(DocumentRelTypes.HAS_AUTHOR, Direction.OUTGOING);
@@ -101,7 +98,7 @@ public class DBModelTraverser {
 		List<Node> modelList = getModelsFromNode(node);
 		for (Iterator<Node> iterator = modelList.iterator(); iterator.hasNext();) {
 			Node modelNode = (Node) iterator.next();
-			Node docNode = DBModelTraverser.getDocumentFromModel(modelNode);
+			Node docNode = ModelTraverser.getDocumentFromModel(modelNode);
 			//TODO make this generic somehow, for now it is bound to SBML
 			
 			// check if model ID is present
@@ -115,7 +112,7 @@ public class DBModelTraverser {
 				modelName = (String)modelNode.getProperty(Property.General.NAME);
 			
 			// Neither modelId nor modelName is set
-			if( (modelId == null || modelId.isEmpty()) && (modelName == null || modelName.isEmpty()) )
+			if( StringUtils.isBlank(modelId) && StringUtils.isBlank(modelName))
 				// skip this one
 				continue;
 				
@@ -129,30 +126,6 @@ public class DBModelTraverser {
 			}
 		return result;
 	}
-	
-	public static List<Node> getAllNodesWithLabel(Label label){
-		List<Node> nodes = new LinkedList<Node>();		
-		try (Transaction tx = Manager.instance().getDatabase().beginTx())
-		{
-			for (ResourceIterator<Node> resourceNodeListIterator = Manager.instance().getDatabase().findNodes(label); resourceNodeListIterator.hasNext();) {
-				nodes.add( (Node) resourceNodeListIterator.next());			
-			}
-			
-			tx.success();
-		}
-		return nodes;
-	}
-
-	public static Node findSingleResourceNodeByURI(String uri) {
-		Node node = null;
-		try {
-			node = Manager.instance().getDatabase().findNode(NodeLabel.Types.RESOURCE, Property.General.URI, uri);
-		} catch (MultipleFoundException e) {
-			return null;
-		}
-		return node;
-	}
-
 
 
 }

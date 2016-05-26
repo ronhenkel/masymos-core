@@ -19,7 +19,7 @@ import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
-import de.unirostock.sems.masymos.database.traverse.DBModelTraverser;
+import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.SBMLModelFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
@@ -158,7 +158,7 @@ public class SBMLModelQuery implements IQueryInterface {
 		for (Iterator<Node> hitsIt = hits.iterator(); hitsIt.hasNext();) {		
 			Node node = (Node) hitsIt.next();
 			if (node.hasLabel(NodeLabel.Types.SBML_MODEL)){
-				result.addAll(DBModelTraverser.getModelResultSetFromNode(node, hits.currentScore(), "ModelIndex"));				
+				result.addAll(ModelTraverser.getModelResultSetFromNode(node, hits.currentScore(), "ModelIndex"));				
 			}
 		}
 		return result;

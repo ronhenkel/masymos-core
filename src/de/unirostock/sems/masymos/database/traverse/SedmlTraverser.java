@@ -18,7 +18,7 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 
-public class DBSedmlTraverser {
+public class SedmlTraverser {
 	
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 	
@@ -67,7 +67,7 @@ public class DBSedmlTraverser {
 	public static SedmlResultSet getResultSetSedmlFromNode(Node node, float score) {
 		//List<ResultSetSedml> result = new LinkedList<ResultSetSedml>();
 		
-			Node docNode = DBSedmlTraverser.fromSedmlToDocument(node);
+			Node docNode = SedmlTraverser.fromSedmlToDocument(node);
 			String versionId = null;
 			if (docNode.hasProperty(Property.General.VERSIONID)) versionId = (String)docNode.getProperty(Property.General.VERSIONID);
 			SedmlResultSet rs = new SedmlResultSet(score,versionId,null, getModelreferencesFromNode(docNode),(String)docNode.getProperty(Property.General.URI),(String)docNode.getProperty(Property.General.FILENAME));

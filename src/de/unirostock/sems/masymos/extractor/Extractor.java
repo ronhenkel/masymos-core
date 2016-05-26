@@ -75,32 +75,44 @@ public abstract class Extractor {
 		return documentNode;
 	}
 	
-	public static Node extractStoreIndex(String path, String modelType)
+	public static Node setDocumentUID(Node documentNode, Long uID){
+		if (uID==null) return documentNode;
+		
+		try (Transaction tx = graphDB.beginTx()){
+				documentNode.setProperty(Property.General.UID, uID);
+				tx.success();
+		}
+			
+		return documentNode;
+	}
+	
+	
+	public static Node extractStoreIndex(String path, String modelType, Long uID)
 			throws XMLStreamException, IOException {
 		switch(modelType){
-		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndex(new FileInputStream(path), null);									 
-		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndex(path, null);
-		case 	Property.ModelType.SEDML : return SEDMLExtractor.extractStoreIndex(new File(path), null);
+		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndexSBML(new FileInputStream(path), null, uID);									 
+		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndexCellML(path, null, uID);
+		case 	Property.ModelType.SEDML : return SEDMLExtractor.extractStoreIndexSEDML(new File(path), null, uID);
 		default : return XMLExtractor.extractStoreIndex(new FileInputStream(path), null);
 		}		
 
 	}
 
-	public static Node extractStoreIndex(byte[] byteArray, String modelType, String versionId)
+	public static Node extractStoreIndex(byte[] byteArray, String modelType, String versionId, Long uID)
 			throws XMLStreamException, IOException {
 		switch(modelType){
-		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndex(new ByteArrayInputStream(byteArray), versionId);									 
+		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndexSBML(new ByteArrayInputStream(byteArray), versionId, uID);									 
 		case 	Property.ModelType.CELLML : {
 			File temp = File.createTempFile("graphstore_model_temp", "xml");
 			FileUtils.writeByteArrayToFile(temp, byteArray);			
-			Node n = CellMLExtractor.extractStoreIndex(temp.getPath(), versionId);
+			Node n = CellMLExtractor.extractStoreIndexCellML(temp.getPath(), versionId, uID);
 			temp.delete();
 			return n;
 		}
 		case 	Property.ModelType.SEDML : {
 			File temp = File.createTempFile("graphstore_sed_temp", "xml");
 			FileUtils.writeByteArrayToFile(temp, byteArray);			
-			Node n = SEDMLExtractor.extractStoreIndex(temp, null, versionId);
+			Node n = SEDMLExtractor.extractStoreIndexSEDML(temp, versionId, uID);
 			temp.delete();
 			return n;
 		}
@@ -109,79 +121,54 @@ public abstract class Extractor {
 		
 	}
 	
-	public static Node extractStoreIndex(URL url, String modelType, String versionId)
+	public static Node extractStoreIndex(URL url, String modelType, String versionId, Long uID)
 			throws XMLStreamException, IOException {
 		switch(modelType){
 
-		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndex(url.openStream(), versionId);									 
-		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndex(url.toString(), versionId);
+		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndexSBML(url.openStream(), versionId, uID);									 
+		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndexCellML(url.toString(), versionId, uID);
 		case 	Property.ModelType.SEDML : {		
 					File temp = File.createTempFile(url.getFile(), "xml");
 					FileUtils.copyURLToFile(url, temp);			
-					Node n = SEDMLExtractor.extractStoreIndex(temp, null, null);
+					Node n = SEDMLExtractor.extractStoreIndexSEDML(temp, versionId, uID);
 					temp.delete();
 					return n;
 			} 
-		default : return XMLExtractor.extractStoreIndex(url.getFile(), versionId);
+		default : return XMLExtractor.extractStoreIndex(new FileInputStream(url.getFile()), versionId);
 		}	
 		
 	}
 	
-	public static Node extractStoreIndex(File file, String modelType, String versionId)
+	public static Node extractStoreIndex(URL url, String modelType, Long uID)
 			throws XMLStreamException, IOException {
 		switch(modelType){
-		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndex(new FileInputStream(file),  versionId);									 
-		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndex(file.getPath(),  versionId);
-		case 	Property.ModelType.SEDML : return SEDMLExtractor.extractStoreIndex(file,  versionId);
+
+		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndexSBML(url.openStream(), null, uID);									 
+		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndexCellML(url.toString(), null, uID);
+		case 	Property.ModelType.SEDML : {		
+					File temp = File.createTempFile(url.getFile(), "xml");
+					FileUtils.copyURLToFile(url, temp);			
+					Node n = SEDMLExtractor.extractStoreIndexSEDML(temp, null, uID);
+					temp.delete();
+					return n;
+			} 
+		default : return XMLExtractor.extractStoreIndex(new FileInputStream(url.getFile()), null);
+		}	
+		
+	}
+	
+	public static Node extractStoreIndex(File file, String modelType, String versionId, Long uID)
+			throws XMLStreamException, IOException {
+		switch(modelType){
+		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndexSBML(new FileInputStream(file),  versionId, uID);									 
+		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndexCellML(file.getPath(),  versionId, uID);
+		case 	Property.ModelType.SEDML : return SEDMLExtractor.extractStoreIndexSEDML(file,  versionId, uID);
 		default : return XMLExtractor.extractStoreIndex(new FileInputStream(file),  versionId);
 		}			
 	}
 	
 
-//	public static Node extractStoreIndex(String path, PublicationWrapper publication, String versionID, String modelType)
-//			throws XMLStreamException, IOException {
-//		switch(modelType){
-//		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndex(new FileInputStream(path),  versionID);									 
-//		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndex(path, versionID);
-//		case 	Property.ModelType.SEDML : return SEDMLExtractor.extractStoreIndex(new File(path), versionID);
-//		default : return XMLExtractor.extractStoreIndex(new FileInputStream(path), versionID);
-//		}		
-//	}
-//
-//	public static Node extractStoreIndex(byte[] byteArray, PublicationWrapper publication, String versionID, String modelType)
-//			throws XMLStreamException, IOException {
-//		switch(modelType){
-//		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndex(new ByteArrayInputStream(byteArray), versionID);										 
-//		case 	Property.ModelType.CELLML : {
-//			
-//			File temp = File.createTempFile("graphstore_model_temp", "xml");
-//			FileUtils.writeByteArrayToFile(temp, byteArray);			
-//			Node n = CellMLExtractor.extractStoreIndex(temp.getPath(), versionID);
-//			temp.delete();
-//			return n;
-//		}
-//		case 	Property.ModelType.SEDML : {
-//			
-//			File temp = File.createTempFile("graphstore_model_temp", "xml");
-//			FileUtils.writeByteArrayToFile(temp, byteArray);			
-//			Node n = SEDMLExtractor.extractStoreIndex(temp, versionID);
-//			temp.delete();
-//			return n;
-//		}
-//		default : return XMLExtractor.extractStoreIndex(new ByteArrayInputStream(byteArray), versionID);
-//		}
-//	}
-//	
-//	public static Node extractStoreIndex(File file, PublicationWrapper publication, String versionID, String modelType)
-//			throws XMLStreamException, IOException {		
-//		switch(modelType){
-//		case 	Property.ModelType.SBML : return SBMLExtractor.extractStoreIndex(new FileInputStream(file), versionID);										 
-//		case 	Property.ModelType.CELLML : return CellMLExtractor.extractStoreIndex(file.getPath(),  versionID);
-//		case 	Property.ModelType.SEDML : return SEDMLExtractor.extractStoreIndex(file, versionID);
-//		default : return XMLExtractor.extractStoreIndex(new FileInputStream(file),versionID);
-//		}
-//		
-//	}
+
 	
 	protected static void processPublication(PublicationWrapper publication, Node referenceNode, Node modelNode) {
 		//all Strings null -> ""

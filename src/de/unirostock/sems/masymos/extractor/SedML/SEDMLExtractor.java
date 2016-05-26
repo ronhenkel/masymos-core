@@ -35,6 +35,7 @@ import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.configuration.Relation.DatabaseRelTypes;
 import de.unirostock.sems.masymos.configuration.Relation.DocumentRelTypes;
 import de.unirostock.sems.masymos.configuration.Relation.SedmlRelTypes;
+import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.extractor.Extractor;
 
 
@@ -42,12 +43,12 @@ public class SEDMLExtractor extends Extractor{
 	
 	
 
-	public static Node extractStoreIndex(File sedFile, String versionID) throws XMLStreamException, IOException{
+	public static Node extractStoreIndexSEDML(File sedFile, String versionID, Long uID) throws XMLStreamException, IOException{
 		 
 		//TODO: include publication wrapper
          Node documentNode = null;   
          try (Transaction tx = graphDB.beginTx()){
-                 documentNode = extractFromSEDML(IOUtils.toString(sedFile.toURI()), versionID);
+                 documentNode = extractFromSEDML(IOUtils.toString(sedFile.toURI()), versionID, uID);
                  tx.success();
          } catch (XMLStreamException e) {
                  documentNode = null;
@@ -58,12 +59,12 @@ public class SEDMLExtractor extends Extractor{
          return documentNode;
  }
 
-	public static Node extractStoreIndex(String sedFile, String versionID) throws XMLStreamException, IOException{
+	public static Node extractStoreIndexSEDML(String sedFile, String versionID, Long uID) throws XMLStreamException, IOException{
 		 
 		//TODO: include publication wrapper
          Node documentNode = null;   
          try (Transaction tx = graphDB.beginTx()){
-                 documentNode = extractFromSEDML(sedFile, versionID);
+                 documentNode = extractFromSEDML(sedFile, versionID, uID);
                  tx.success();
          } catch (XMLStreamException e) {
                  documentNode = null;
@@ -75,7 +76,7 @@ public class SEDMLExtractor extends Extractor{
  }	
 	
 
-	private static Node extractFromSEDML(String sedFile, String versionID) throws XMLStreamException {
+	private static Node extractFromSEDML(String sedFile, String versionID, Long uID) throws XMLStreamException {
 		
 		SEDMLDocument doc = null;
 		try {
@@ -85,7 +86,7 @@ public class SEDMLExtractor extends Extractor{
 			e.printStackTrace();
 		}
 		//create SEDML document
-		Node documentNode = graphDB.createNode();
+		Node documentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 		documentNode.addLabel(NodeLabel.Types.DOCUMENT);
 		//documentNode.setProperty(Property.SEDML.VERSION, doc.getVersion());
 		if (versionID!=null) documentNode.setProperty(Property.General.VERSIONID, versionID);
@@ -93,23 +94,23 @@ public class SEDMLExtractor extends Extractor{
 		SedML sed = doc.getSedMLModel(); 
 		
 		//create SEDML node
-		Node sedmlNode = graphDB.createNode();
-		documentNode.createRelationshipTo(sedmlNode, DocumentRelTypes.HAS_SEDML);
-		sedmlNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO);
+		Node sedmlNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(documentNode.createRelationshipTo(sedmlNode, DocumentRelTypes.HAS_SEDML), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(sedmlNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);
 		sedmlNode.addLabel(NodeLabel.Types.SEDML);
 		
 		
 		//create Modelnodes
-		Map<String, Node> modelNodes = extractSEDMLModels(sed.getModels(),sedmlNode);
+		Map<String, Node> modelNodes = extractSEDMLModels(sed.getModels(),sedmlNode, uID);
 		
 		//create Simulationnodes
-		Map<String, Node> simulationNodes = extractSEDMLSimulations(sed.getSimulations(), sedmlNode);
+		Map<String, Node> simulationNodes = extractSEDMLSimulations(sed.getSimulations(), sedmlNode, uID);
 		//create Task-Relationships
-		Map<String,Node[]> taskNodes= extractSEDMLTasks(sed.getTasks(), sedmlNode, modelNodes, simulationNodes);
+		Map<String,Node[]> taskNodes= extractSEDMLTasks(sed.getTasks(), sedmlNode, modelNodes, simulationNodes, uID);
 		//create DataGenerators
-		Map<String,Node> datageneratorNodes = extractSEDMLDataGenerators(sed.getDataGenerators(), sedmlNode, taskNodes);
+		Map<String,Node> datageneratorNodes = extractSEDMLDataGenerators(sed.getDataGenerators(), sedmlNode, taskNodes, uID);
 		//create Outputnodes
-		extractSEDMLOutputs(sed.getOutputs(),sedmlNode,datageneratorNodes);	
+		extractSEDMLOutputs(sed.getOutputs(),sedmlNode,datageneratorNodes, uID);	
 	 
 	//TODO !!!!!!! Fehler abfangen etc.
 	return documentNode;
@@ -118,14 +119,14 @@ public class SEDMLExtractor extends Extractor{
 		
 	
 		
-	private static Map<String, Node> extractSEDMLModels(List<Model> listOfModelReferences, Node sedmlNode) {
+	private static Map<String, Node> extractSEDMLModels(List<Model> listOfModelReferences, Node sedmlNode, Long uID) {
 		
 		Map<String, Node> modelNodes = new HashMap<String, Node>();
 		
 		for (Model model : listOfModelReferences){
-			Node modelNode = graphDB.createNode();
-			sedmlNode.createRelationshipTo(modelNode, SedmlRelTypes.HAS_MODELREFERENCE);
-			modelNode.createRelationshipTo(sedmlNode, DatabaseRelTypes.BELONGS_TO);
+			Node modelNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(sedmlNode.createRelationshipTo(modelNode, SedmlRelTypes.HAS_MODELREFERENCE), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(sedmlNode, DatabaseRelTypes.BELONGS_TO), uID);
 			
 			modelNode.setProperty(Property.SEDML.MODELCHANGED, model.hasChanges());
 			modelNode.addLabel(NodeLabel.Types.SEDML_MODELREFERENCE);
@@ -148,12 +149,12 @@ public class SEDMLExtractor extends Extractor{
 	}
 	
 
-	private static void extractSEDMLOutputs(List<Output> listOfOutputs, Node documentNode, Map<String,Node> datageneratorNodes) {
+	private static void extractSEDMLOutputs(List<Output> listOfOutputs, Node documentNode, Map<String,Node> datageneratorNodes, Long uID) {
 		
 		for (Output output : listOfOutputs){
-			Node outputNode = graphDB.createNode();
-			documentNode.createRelationshipTo(outputNode, SedmlRelTypes.HAS_OUTPUT);
-			outputNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO);
+			Node outputNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(documentNode.createRelationshipTo(outputNode, SedmlRelTypes.HAS_OUTPUT), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(outputNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);
 			outputNode.setProperty(Property.SEDML.OUTPUT_TYPE, output.getKind());
 			outputNode.addLabel(NodeLabel.Types.SEDML_OUTPUT);
 			
@@ -164,11 +165,11 @@ public class SEDMLExtractor extends Extractor{
 			
 			switch (output.getKind()) {
 				case "Plot2D": 	 
-								extractSEDMLOutCurves(((Plot2D)output).getListOfCurves(), outputNode, datageneratorNodes);
+								extractSEDMLOutCurves(((Plot2D)output).getListOfCurves(), outputNode, datageneratorNodes, uID);
 								break;
-				case "Plot3D": 	extractSEDMLOutSurfaces(((Plot3D)output).getListOfSurfaces(), outputNode);
+				case "Plot3D": 	extractSEDMLOutSurfaces(((Plot3D)output).getListOfSurfaces(), outputNode, uID);
 								break;
-				case "Report": 	extractSEDMLOutDatasets(((Report)output).getListOfDataSets(), outputNode);
+				case "Report": 	extractSEDMLOutDatasets(((Report)output).getListOfDataSets(), outputNode, uID);
 								break;
 				default:  break;
 			}
@@ -178,12 +179,12 @@ public class SEDMLExtractor extends Extractor{
 		}	
 	}
 	
-	private static void extractSEDMLOutCurves(List<Curve> listOfCurve, Node outputNode, Map<String,Node> datageneratorNodes) {
+	private static void extractSEDMLOutCurves(List<Curve> listOfCurve, Node outputNode, Map<String,Node> datageneratorNodes, Long uID) {
 		
 		for (Curve curve : listOfCurve){
-			Node curveNode = graphDB.createNode();
-			outputNode.createRelationshipTo(curveNode, SedmlRelTypes.HAS_CURVE);
-			curveNode.createRelationshipTo(outputNode, DatabaseRelTypes.BELONGS_TO);
+			Node curveNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(outputNode.createRelationshipTo(curveNode, SedmlRelTypes.HAS_CURVE), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(curveNode.createRelationshipTo(outputNode, DatabaseRelTypes.BELONGS_TO), uID);
 						
 			curveNode.addLabel(NodeLabel.Types.SEDML_CURVE);
 			
@@ -192,7 +193,7 @@ public class SEDMLExtractor extends Extractor{
 					for (Relationship rel : ((datageneratorNodes.get(curve.getXDataReference())).getRelationships(SedmlRelTypes.CALCULATES_MODEL)))
 					{
 						Node modelNode = rel.getEndNode();
-						curveNode.createRelationshipTo(modelNode, SedmlRelTypes.IS_ENTITY_OF);
+						IdFactory.instance().addToRelationshipDeleteIndex(curveNode.createRelationshipTo(modelNode, SedmlRelTypes.IS_ENTITY_OF), uID);
 						//modelNode.createRelationshipTo(curveNode, DatabaseRelTypes.BELONGS_TO_CURVE);
 					}
 			
@@ -202,19 +203,19 @@ public class SEDMLExtractor extends Extractor{
 				for (Relationship rel : ((datageneratorNodes.get(curve.getYDataReference())).getRelationships(SedmlRelTypes.CALCULATES_MODEL)))
 				{
 					Node modelNode = rel.getEndNode();
-					curveNode.createRelationshipTo(modelNode, SedmlRelTypes.IS_ENTITY_OF);
+					IdFactory.instance().addToRelationshipDeleteIndex(curveNode.createRelationshipTo(modelNode, SedmlRelTypes.IS_ENTITY_OF), uID);
 					//modelNode.createRelationshipTo(curveNode, RelTypes.BELONGS_TO_CURVE);
 				}
 			}
 		}	
 	}
 	
-	private static void extractSEDMLOutSurfaces(List<Surface> listOfSurface, Node outputNode) {
+	private static void extractSEDMLOutSurfaces(List<Surface> listOfSurface, Node outputNode, Long uID) {
 		
 		for (Surface surface : listOfSurface){
-			Node surfaceNode = graphDB.createNode();
-			outputNode.createRelationshipTo(surfaceNode, SedmlRelTypes.HAS_SURFACE);
-			surfaceNode.createRelationshipTo(outputNode, DatabaseRelTypes.BELONGS_TO);
+			Node surfaceNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(outputNode.createRelationshipTo(surfaceNode, SedmlRelTypes.HAS_SURFACE), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(surfaceNode.createRelationshipTo(outputNode, DatabaseRelTypes.BELONGS_TO), uID);
 			surfaceNode.setProperty(Property.SEDML.XDATA, surface.getXDataReference());
 			surfaceNode.setProperty(Property.SEDML.YDATA, surface.getYDataReference());
 			surfaceNode.setProperty(Property.SEDML.ZDATA, surface.getZDataReference());
@@ -226,12 +227,12 @@ public class SEDMLExtractor extends Extractor{
 		}	
 	}
 	
-	private static void extractSEDMLOutDatasets(List<DataSet> listOfDataSet, Node outputNode) {
+	private static void extractSEDMLOutDatasets(List<DataSet> listOfDataSet, Node outputNode, Long uID) {
 		
 		for (DataSet dataset : listOfDataSet){
-			Node datasetNode = graphDB.createNode();
-			outputNode.createRelationshipTo(datasetNode, SedmlRelTypes.HAS_DATASET);
-			datasetNode.createRelationshipTo(outputNode, DatabaseRelTypes.BELONGS_TO);
+			Node datasetNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(outputNode.createRelationshipTo(datasetNode, SedmlRelTypes.HAS_DATASET), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(datasetNode.createRelationshipTo(outputNode, DatabaseRelTypes.BELONGS_TO), uID);
 			datasetNode.setProperty(Property.SEDML.DATALABEL, dataset.getLabel());
 			
 			datasetNode.addLabel(NodeLabel.Types.SEDML_DATASET);
@@ -242,14 +243,14 @@ public class SEDMLExtractor extends Extractor{
 		}	
 	}
 	
-	private static Map<String, Node> extractSEDMLSimulations(List<Simulation> listOfSimulation, Node documentNode) {
+	private static Map<String, Node> extractSEDMLSimulations(List<Simulation> listOfSimulation, Node documentNode, Long uID) {
 		
 		Map<String, Node> simulationNodes = new HashMap<String, Node>();
 		
 		for (Simulation simulation : listOfSimulation){
-			Node simulationNode = graphDB.createNode();
-			documentNode.createRelationshipTo(simulationNode, SedmlRelTypes.HAS_SIMULATION);
-			simulationNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO);
+			Node simulationNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(documentNode.createRelationshipTo(simulationNode, SedmlRelTypes.HAS_SIMULATION), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(simulationNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);
 			simulationNode.setProperty(Property.SEDML.SIM_TYPE, simulation.getSimulationKind());
 			simulationNode.setProperty(Property.SEDML.SIM_KISAO, simulation.getAlgorithm().getKisaoID());
 			
@@ -266,32 +267,32 @@ public class SEDMLExtractor extends Extractor{
 	}
 	
 	
-private static Map<String,Node> extractSEDMLDataGenerators(List<DataGenerator> listOfDataGenerator, Node documentNode, Map<String,Node[]> taskNodes) {
+private static Map<String,Node> extractSEDMLDataGenerators(List<DataGenerator> listOfDataGenerator, Node documentNode, Map<String,Node[]> taskNodes, Long uID) {
 		
 		Map<String,Node> datageneratorNodes = new HashMap<String,Node>();
 	
 	
 		for (DataGenerator datagenerator : listOfDataGenerator){
-			Node datageneratorNode = graphDB.createNode();
-			documentNode.createRelationshipTo(datageneratorNode, SedmlRelTypes.HAS_DATAGENERATOR);
-			datageneratorNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO);			
+			Node datageneratorNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(documentNode.createRelationshipTo(datageneratorNode, SedmlRelTypes.HAS_DATAGENERATOR), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(datageneratorNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);			
 			datageneratorNode.addLabel(NodeLabel.Types.SEDML_DATAGENERATOR);
 			datageneratorNode.setProperty(Property.SEDML.MATH, datagenerator.getMath().toString());
 			//datageneratorNode.setProperty(Property.General.NAME, datagenerator.getName());
 			datageneratorNode.setProperty(Property.General.ID, datagenerator.getId());
 			
 			for (Variable var : datagenerator.getListOfVariables()){
-				Node variableNode = graphDB.createNode();
+				Node variableNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 				//variableNode.setProperty(Property.General.NAME, var.getName());
 				variableNode.setProperty(Property.General.ID, var.getId());
 				if (!StringUtils.isEmpty(var.getTarget())) variableNode.setProperty(Property.SEDML.TARGET, var.getTarget());
-				variableNode.createRelationshipTo(datageneratorNode, DatabaseRelTypes.BELONGS_TO);				
-				datageneratorNode.createRelationshipTo(variableNode,SedmlRelTypes.HAS_VARIABLE);
+				IdFactory.instance().addToRelationshipDeleteIndex(variableNode.createRelationshipTo(datageneratorNode, DatabaseRelTypes.BELONGS_TO), uID);				
+				IdFactory.instance().addToRelationshipDeleteIndex(datageneratorNode.createRelationshipTo(variableNode,SedmlRelTypes.HAS_VARIABLE), uID);
 				variableNode.addLabel(NodeLabel.Types.SEDML_VARIABLE);
 								
 				Node modelNode = (taskNodes.get(var.getReference()))[0]; 
-				variableNode.createRelationshipTo(modelNode, SedmlRelTypes.CALCULATES_MODEL);
-				modelNode.createRelationshipTo(variableNode, SedmlRelTypes.USED_IN_DATAGENERATOR);
+				IdFactory.instance().addToRelationshipDeleteIndex(variableNode.createRelationshipTo(modelNode, SedmlRelTypes.CALCULATES_MODEL), uID);
+				IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(variableNode, SedmlRelTypes.USED_IN_DATAGENERATOR), uID);
 				
 			}
 			
@@ -302,7 +303,7 @@ private static Map<String,Node> extractSEDMLDataGenerators(List<DataGenerator> l
 		return datageneratorNodes;
 	}
 
-private static Map<String, Node[]> extractSEDMLTasks(List<Task> listOfTask, Node documentNode, Map<String,Node> modelNodes, Map<String,Node> simulationNodes){
+private static Map<String, Node[]> extractSEDMLTasks(List<Task> listOfTask, Node documentNode, Map<String,Node> modelNodes, Map<String,Node> simulationNodes, Long uID){
 	
 	Map<String,Node[]> tasks = new HashMap<String,Node[]>();
 	
@@ -312,19 +313,19 @@ private static Map<String, Node[]> extractSEDMLTasks(List<Task> listOfTask, Node
 			Node simNode = simulationNodes.get(task.getSimulationReference());
 			Node modelNode = modelNodes.get(task.getModelReference());
 		
-			Node taskNode = graphDB.createNode();
-			documentNode.createRelationshipTo(taskNode, SedmlRelTypes.HAS_TASK);
-			taskNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO);
+			Node taskNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(documentNode.createRelationshipTo(taskNode, SedmlRelTypes.HAS_TASK), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(taskNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);
 			
 			taskNode.addLabel(NodeLabel.Types.SEDML_TASK);
 
 			//TODO names
-			simNode.createRelationshipTo(taskNode, SedmlRelTypes.IS_REFERENCED_IN_TASK);
-			modelNode.createRelationshipTo(taskNode, SedmlRelTypes.IS_REFERENCED_IN_TASK);
-			taskNode.createRelationshipTo(modelNode, SedmlRelTypes.REFERENCES_MODEL);
-			taskNode.createRelationshipTo(simNode, SedmlRelTypes.REFERENCES_SIMULATION);
-			simNode.createRelationshipTo(modelNode, SedmlRelTypes.SIMULATES);
-			modelNode.createRelationshipTo(simNode, SedmlRelTypes.IS_SIMULATED);
+			IdFactory.instance().addToRelationshipDeleteIndex(simNode.createRelationshipTo(taskNode, SedmlRelTypes.IS_REFERENCED_IN_TASK), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(taskNode, SedmlRelTypes.IS_REFERENCED_IN_TASK), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(taskNode.createRelationshipTo(modelNode, SedmlRelTypes.REFERENCES_MODEL), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(taskNode.createRelationshipTo(simNode, SedmlRelTypes.REFERENCES_SIMULATION), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(simNode.createRelationshipTo(modelNode, SedmlRelTypes.SIMULATES), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(simNode, SedmlRelTypes.IS_SIMULATED), uID);
 			
 			Node[] array = new Node[2];
 			array[0] = modelNode;

@@ -14,7 +14,7 @@ import org.neo4j.graphdb.Transaction;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
-import de.unirostock.sems.masymos.database.traverse.DBModelTraverser;
+import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
 
 public class AnnotationResolverUtil {
 	
@@ -54,8 +54,8 @@ public class AnnotationResolverUtil {
 	public void fillAnnotationFullTextIndex(){
 		
 		if (AnnotationResolverUtil.instance().isIndexLocked()){
-			while (AnnotationResolverUtil.instance().isIndexLocked()){
-				ExecutorService executor = Executors.newSingleThreadExecutor();
+			ExecutorService executor = Executors.newSingleThreadExecutor();			
+			while (AnnotationResolverUtil.instance().isIndexLocked()){	
 				WaitThreat wt = new WaitThreat();
 				try {
 					//Runtime.getRuntime().addShutdownHook(wt);
@@ -74,7 +74,7 @@ public class AnnotationResolverUtil {
 		String uri = "";
 		//ReadableIndex<Node> autoNodeIndex = Manager.instance().getAutoNodeIndex();
 		//IndexHits<Node> resourceNodeList = autoNodeIndex.get(Property.General.NODETYPE, Property.NodeType.RESOURCE);
-		List<Node> nodes = DBModelTraverser.getAllNodesWithLabel(NodeLabel.Types.RESOURCE); 
+		List<Node> nodes = DocumentTraverser.getAllNodesWithLabel(NodeLabel.Types.RESOURCE); 
 		List<String> uriList = new LinkedList<String>();
 		
 		try (Transaction tx = Manager.instance().getDatabase().beginTx())

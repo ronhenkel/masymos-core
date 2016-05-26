@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import de.unirostock.sems.masymos.database.Manager;
@@ -19,66 +20,54 @@ import de.unirostock.sems.masymos.query.types.SedmlQuery;
 import de.unirostock.sems.masymos.util.ResultSetUtil;
 
 public class QueryAdapter {
+	
+	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 
 	
 	public static List<ModelResultSet> executeSingleQueryForModels(IQueryInterface iq){
-		Transaction tx = Manager.instance().getDatabase().beginTx();
-		try
+		List<ModelResultSet> mrs = new LinkedList<ModelResultSet>();
+		try (Transaction tx = graphDB.beginTx())
 		{
-			return iq.getModelResults();
-			
-		} 
-		finally
-		{
+			mrs = iq.getModelResults();
 			tx.success();
-		}
-		
+		} 
+		 return mrs;
 		
 	}
 	
 	public static List<AnnotationResultSet> executeAnnotationQuery(AnnotationQuery aq){
-		Transaction tx = Manager.instance().getDatabase().beginTx();
-		try
+		List<AnnotationResultSet> ars = new LinkedList<AnnotationResultSet>();
+		try (Transaction tx = graphDB.beginTx())
 		{
-			return aq.getResults();
-			
-		} 
-		finally
-		{
+			ars =  aq.getResults();
 			tx.success();
-		}
+		} 
+		return ars;
 		
 		
 	}
 	
 	public static List<PersonResultSet> executePersonQuery(PersonQuery persq){
-		Transaction tx = Manager.instance().getDatabase().beginTx();
-		try
+		List<PersonResultSet> prs = new LinkedList<PersonResultSet>();
+		try (Transaction tx = graphDB.beginTx())
 		{
-			return persq.getResults();
-			
-		} 
-		finally
-		{
+			prs =  persq.getResults();
 			tx.success();
-		}
+		} 
 		
+		return prs;
 		
 	}
 	
 	public static List<PublicationResultSet> executePublicationQuery(PublicationQuery pubq){
-		Transaction tx = Manager.instance().getDatabase().beginTx();
-		try
+		List<PublicationResultSet> prs = new LinkedList<PublicationResultSet>();
+		try (Transaction tx = graphDB.beginTx())
 		{
-			return pubq.getResults();
+			prs = pubq.getResults();
+			tx.success();
 			
 		} 
-		finally
-		{
-			tx.success();
-
-		}
-		
+		return prs;
 		
 	}
 	
@@ -86,52 +75,35 @@ public class QueryAdapter {
 		List<ModelResultSet> rs = new LinkedList<ModelResultSet>();
 		for (Iterator<IQueryInterface> iqIt = iqList.iterator(); iqIt.hasNext();) {
 			IQueryInterface interfaceQuery = (IQueryInterface) iqIt.next();	
-			Transaction tx = Manager.instance().getDatabase().beginTx();
-			try
+			try (Transaction tx = graphDB.beginTx())
 			{
 				rs.addAll(interfaceQuery.getModelResults());
-				
-			} 
-			finally
-			{
 				tx.success();
-
-			}
-			
+			} 
 		}
 		rs = ResultSetUtil.sortModelResultSetByScore(rs);
 		return rs;
 	}
 	
 	public static List<SedmlResultSet> executeSedmlQuery(SedmlQuery sedq){
-		Transaction tx = Manager.instance().getDatabase().beginTx();
-		try
+		List<SedmlResultSet> srs = new LinkedList<SedmlResultSet>();
+		try (Transaction tx = graphDB.beginTx())
 		{
-			return sedq.getResults();
-			
-		} 
-		finally
-		{
+			srs =  sedq.getResults();
 			tx.success();
-
 		}
-		
+		return srs;
 		
 	}
 	
 	public static List<ModelResultSet> executeSedmlQueryForModels(SedmlQuery sedq){
-		Transaction tx = Manager.instance().getDatabase().beginTx();
-		try
+		List<ModelResultSet> mrs = new LinkedList<ModelResultSet>();
+		try (Transaction tx = graphDB.beginTx())
 		{
-			return sedq.getModelResults();
-			
-		} 
-		finally
-		{
+			mrs = sedq.getModelResults();
 			tx.success();
-
-		}
-				
+		} 
+		return mrs;				
 	}
 
 }
