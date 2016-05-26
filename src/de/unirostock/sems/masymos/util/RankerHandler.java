@@ -32,7 +32,7 @@ public class RankerHandler {
 	
 	
 	public int getLength(){
-		return this.rankerMap.keySet().size();
+		return this.modelIDList.size();
 	}
 	
 
@@ -63,9 +63,11 @@ public class RankerHandler {
 	
 	
 	public void updateScoreByModelID(String modelID, float newScore){
-		ModelResultSet model = this.rankerMap.get(modelID);
-		model.setScore(newScore);
-		this.rankerMap.put(modelID, model);
+		if(this.rankerMap.containsKey(modelID)){
+			ModelResultSet model = this.rankerMap.get(modelID);
+			model.setScore(newScore);
+			this.rankerMap.put(modelID, model);
+		}
 	}
 	
 	
@@ -80,12 +82,12 @@ public class RankerHandler {
 	}
 	
 	
-	public RankerHandler getDifferenceTo(RankerHandler r2){  //returns all the elements in 'this' but not in 'r2' {{this} - {r2}}
+	/*public RankerHandler getDifferenceTo(RankerHandler r2){  //returns all the elements in 'this' but not in 'r2' {{this} - {r2}}
 		RankerHandler diff = new RankerHandler(null);
 		int count = 1;
 		
 		for(String modelId: this.modelIDList)
-			if (r2.containsByModelID(modelId)){  //if r2 doesn't contain 'model'
+			if (!r2.containsByModelID(modelId)){  //if r2 doesn't contain 'model'
 				ModelResultSet model = this.rankerMap.get(modelId);
 				ModelResultSet newModel = model.copyModelResultSet();
 				diff.rankerMap.put(model.getModelID(), newModel);
@@ -95,7 +97,7 @@ public class RankerHandler {
 		}
 		
 		return diff;
-	}
+	}*/
 	
 	
 	public List<ModelResultSet> makeResultsList(){
