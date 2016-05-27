@@ -134,7 +134,7 @@ public class ModelDeleter {
 				Map<String, Index<Relationship>> relIndexMap = Manager.instance().getRelationshipIndexMap();
 				for (Iterator<Index<Relationship>> indexIterator = relIndexMap.values().iterator(); indexIterator.hasNext();) {
 					Index<Relationship> idx = (Index<Relationship>) indexIterator.next();
-					idx.remove(rel);
+					if (idx!=null) idx.remove(rel);
 				}
 				//and from the relationShipDeleteIndex
 				relationshipDeleteIndex.remove(rel);
@@ -153,7 +153,7 @@ public class ModelDeleter {
 				Map<String, Index<Node>> nodeIndexMap = Manager.instance().getNodeIndexMap();
 				for (Iterator<Index<Node>> indexIterator = nodeIndexMap.values().iterator(); indexIterator.hasNext();) {
 					Index<Node> idx = (Index<Node>) indexIterator.next();
-					idx.remove(node);
+					if (idx!=null) idx.remove(node);
 				}
 				//and from the relationShipDeleteIndex
 				nodeDeleteIndex.remove(node);
@@ -166,7 +166,8 @@ public class ModelDeleter {
 			String queryString = "MATCH (n:RESOURCE) where NOT ((n)--()) RETURN n AS res";
 			for (Iterator<Node> iterator = graphDB.execute( queryString ).columnAs( "res" ); iterator.hasNext();) {
 				Node node = (Node) iterator.next();
-				Manager.instance().getAnnotationIndex().remove(node);
+				Index<Node> idx  = Manager.instance().getAnnotationIndex();
+				if (idx!=null) idx.remove(node);
 				nodeDeleteIndex.remove(node);
 				
 				node.delete();
@@ -184,7 +185,8 @@ public class ModelDeleter {
 					Relationship rel = (Relationship) relIt.next();
 					rel.delete();
 				}
-				Manager.instance().getAnnotationIndex().remove(node);
+				Index<Node> idx  = Manager.instance().getPublicationIndex();
+				if (idx!=null) idx.remove(node);
 				nodeDeleteIndex.remove(node);
 				
 				node.delete();
@@ -195,7 +197,8 @@ public class ModelDeleter {
 			queryString = "MATCH (n:PERSON) where NOT ((n)--()) RETURN n AS pers";
 			for (Iterator<Node> iterator = graphDB.execute( queryString ).columnAs( "pers" ); iterator.hasNext();) {
 				Node node = (Node) iterator.next();
-				Manager.instance().getAnnotationIndex().remove(node);
+				Index<Node> idx = Manager.instance().getPublicationIndex();
+				if (idx!=null) idx.remove(node);
 				nodeDeleteIndex.remove(node);
 				
 				node.delete();
