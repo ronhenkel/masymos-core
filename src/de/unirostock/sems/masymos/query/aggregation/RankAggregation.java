@@ -358,7 +358,7 @@ public class RankAggregation {
 					if(rankingOfModel2 == -1)
 						rankingOfModel2 = Integer.MAX_VALUE; 
 					
-					if(rankingOfModel1 < rankingOfModel2)
+					if(rankingOfModel1 <= rankingOfModel2)
 						score += weights.get(l);
 				}
 				
