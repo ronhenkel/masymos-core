@@ -19,7 +19,7 @@ import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
-import de.unirostock.sems.masymos.database.traverse.DBModelTraverser;
+import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.PersonFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
@@ -146,7 +146,7 @@ public class PersonQuery implements IQueryInterface{
 		for (Iterator<Node> hitsIt = hits.iterator(); hitsIt.hasNext();) {		
 			Node node = (Node) hitsIt.next();
 			if (node.hasLabel(NodeLabel.Types.PERSON)){
-				result.addAll(DBModelTraverser.getModelResultSetFromNode(node, hits.currentScore(),"PersonIndex"));				
+				result.addAll(ModelTraverser.getModelResultSetFromNode(node, hits.currentScore(),"PersonIndex"));				
 			}
 		}
 		return result;
@@ -170,7 +170,7 @@ public class PersonQuery implements IQueryInterface{
 									(String)node.getProperty(Property.Person.GIVENNAME, ""),
 									(String)node.getProperty(Property.Person.EMAIL, ""),
 									(String)node.getProperty(Property.Person.ORGANIZATION, ""));
-				List<Node> documentNodes = DBModelTraverser.getDocumentsFromNode(node);
+				List<Node> documentNodes = ModelTraverser.getDocumentsFromNode(node);
 				for (Iterator<Node> docNodeIt = documentNodes.iterator(); docNodeIt.hasNext();) {
 					Node docNode = (Node) docNodeIt.next();
 					if (docNode.hasProperty(Property.General.URI)) prs.addRelatedModelURI((String)docNode.getProperty(Property.General.URI));

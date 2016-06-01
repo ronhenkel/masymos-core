@@ -8,20 +8,26 @@ import java.util.concurrent.Callable;
 
 import org.neo4j.graphdb.Node;
 
+import de.unirostock.sems.masymos.database.IdFactory;
+import de.unirostock.sems.masymos.extractor.Extractor;
+
 
 public class SEDMLExtractorThread  implements Callable<Node> {
 
 	private String filePath;
 	private String versionID;
+	private Long uID;
 	
 	public SEDMLExtractorThread(String filePath, String versionID){
 		this.versionID = versionID;
 		this.filePath = filePath;
+		this.uID = IdFactory.instance().getID();
 	}
 	
 	public SEDMLExtractorThread(String filePath){
 		this.versionID = null;
 		this.filePath = filePath;
+		this.uID = IdFactory.instance().getID();
 	}
 	
 	@Override
@@ -43,6 +49,8 @@ public class SEDMLExtractorThread  implements Callable<Node> {
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }   
-		return SEDMLExtractor.extractStoreIndex(sb.toString(),versionID);
+	    Node documentNode = SEDMLExtractor.extractStoreIndexSEDML(sb.toString(),versionID, uID);
+	    Extractor.setDocumentUID(documentNode, uID);
+	    return documentNode;
 	}
 }

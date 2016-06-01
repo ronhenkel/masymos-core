@@ -11,6 +11,8 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
+import de.unirostock.sems.masymos.configuration.Property;
+
 
 
 
@@ -18,7 +20,7 @@ public class ModelLookup {
 
 	static GraphDatabaseService graphDB =  Manager.instance().getDatabase() ;
 	
-	public static List<String> getModelHistory(String fileID){
+	public static List<String> getDocumentHistory(String fileID){
 	
 		Result result;
 		List<String> versionIdList = new LinkedList<String>();
@@ -37,7 +39,7 @@ public class ModelLookup {
 		return versionIdList;		
 	}
 
-	public static Map<String,String>getModelVersion(String fileID, String versionID){
+	public static Map<String,String>getDocumentVersion(String fileID, String versionID){
 		 
 		Result result;
 		Map<String, String> modelMap = new HashMap<String, String>();
@@ -62,7 +64,7 @@ public class ModelLookup {
 		return modelMap;		
 	}
 	
-	public static Map<String, String> getModel(String fileID){
+	public static Map<String, String> getDocument(String fileID){
 
 		Result result;
 		Map<String, String> modelMap = new HashMap<String, String>();
@@ -89,7 +91,7 @@ public class ModelLookup {
 				
 	}
 	
-	public static List<Node> getModelHistoryNodes(String fileID){
+	public static List<Node> getDocumentHistoryNodeList(String fileID){
 		
 		Result result;
 		List<Node> versionIdList = new LinkedList<Node>();
@@ -108,7 +110,7 @@ public class ModelLookup {
 		return versionIdList;		
 	}
 
-	public static Node getModelVersionNode(String fileID, String versionID){
+	public static Node getDocumentVersionNode(String fileID, String versionID){
 		 
 		Result result;
 		Node n = null;
@@ -126,7 +128,7 @@ public class ModelLookup {
 		return n;		
 	}
 	
-	public static Node getModelNode(String fileID){
+	public static Node getDocumentNode(String fileID){
 
 		Result result;
 		Node n = null;
@@ -138,6 +140,48 @@ public class ModelLookup {
 			for (ResourceIterator<Node> iterator = result.columnAs("d"); iterator.hasNext();)
 			{
 				n = (Node) iterator.next();
+				
+			  //TODO ensure uniqueness...something like iterator.next() -> throw exception?
+			}
+			 ignored.success();
+		}
+		return n;		
+				
+	}
+	
+	public static Long getLatestDocumentUID(String fileID){
+
+		Result result;
+		Long n = Long.MIN_VALUE;
+		try ( Transaction ignored =graphDB.beginTx() )
+		{
+			String query =  "match (d:DOCUMENT) where (d.FILEID=\""+ fileID+"\") AND NOT((d)-[:HAS_SUCCESSOR]->()) return d.UID as " + Property.General.UID;
+			result = graphDB.execute(query); 
+					
+			for (ResourceIterator<Long> iterator = result.columnAs(Property.General.UID); iterator.hasNext();)
+			{
+				n = (Long) iterator.next();
+				
+			  //TODO ensure uniqueness...something like iterator.next() -> throw exception?
+			}
+			 ignored.success();
+		}
+		return n;		
+				
+	}
+
+	public static Long getDocumentUID(String fileID, String versionID){
+	
+		Result result;
+		Long n = Long.MIN_VALUE;
+		try ( Transaction ignored =graphDB.beginTx() )
+		{
+			String query =  "match (d:DOCUMENT) where (d.FILEID=\""+ fileID+"\") AND (d.VERSIONID=\""+ versionID +"\") return d.UID as " + Property.General.UID;
+			result = graphDB.execute(query); 
+					
+			for (ResourceIterator<Long> iterator = result.columnAs(Property.General.UID); iterator.hasNext();)
+			{
+				n = (Long) iterator.next();
 				
 			  //TODO ensure uniqueness...something like iterator.next() -> throw exception?
 			}

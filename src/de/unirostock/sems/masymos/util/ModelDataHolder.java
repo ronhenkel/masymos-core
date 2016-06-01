@@ -20,7 +20,7 @@ public final class ModelDataHolder {
 		this.xmldoc = xmldoc;  // URI where to download the model
 		this.parentMap = parentMap; //versionId of parents
 		this.metaMap = metaMap; //key, value ModelCrawler specific
-		this.modelType = modelType; //sbml or cellml 
+		this.modelType = modelType; //sbml or cellml or sedml
 	}
 
 	public Map<String, String> getMetaMap() {

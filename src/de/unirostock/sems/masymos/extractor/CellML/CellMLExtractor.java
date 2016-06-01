@@ -16,6 +16,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
@@ -35,6 +36,7 @@ import de.unirostock.sems.masymos.configuration.Relation.DatabaseRelTypes;
 import de.unirostock.sems.masymos.configuration.Relation.DocumentRelTypes;
 import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.data.PublicationWrapper;
+import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.extractor.Extractor;
 import de.unirostock.sems.masymos.util.CmetaContainer;
 
@@ -42,12 +44,12 @@ import de.unirostock.sems.masymos.util.CmetaContainer;
 
 public class CellMLExtractor extends Extractor{
 	
-	public static Node extractStoreIndex(String filePath, String versionID) throws XMLStreamException, IOException{
+	public static Node extractStoreIndexCellML(String filePath, String versionID, Long uID) throws XMLStreamException, IOException{
 		Node documentNode = null;
 		
 		try (Transaction tx = graphDB.beginTx()){
 			URL url = new URL(filePath);
-			documentNode = extractFromCellML(url, versionID);
+			documentNode = extractFromCellML(url, versionID, uID);
 			tx.success();
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -56,7 +58,7 @@ public class CellMLExtractor extends Extractor{
 		if (documentNode==null) {
 
 			try (Transaction tx = graphDB.beginTx()){
-				documentNode = graphDB.createNode();				
+				documentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);				
 				documentNode.addLabel(NodeLabel.Types.DOCUMENT);
 				tx.success();
 			}
@@ -65,9 +67,9 @@ public class CellMLExtractor extends Extractor{
 	}
 
 
-	private static Node extractFromCellML(URL url, String versionID){
+	private static Node extractFromCellML(URL url, String versionID, Long uID){
 		
-		Node documentNode = graphDB.createNode();
+		Node documentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(),uID);
 		
 		documentNode.addLabel(NodeLabel.Types.DOCUMENT);
 		//try to parse CellML model
@@ -88,9 +90,9 @@ public class CellMLExtractor extends Extractor{
 		
 		
 			
-		Node modelNode = graphDB.createNode();
-		documentNode.createRelationshipTo(modelNode, DocumentRelTypes.HAS_MODEL);
-		modelNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO);
+		Node modelNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(),uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(documentNode.createRelationshipTo(modelNode, DocumentRelTypes.HAS_MODEL), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);
 		modelNode.setProperty(Property.General.NAME, model.getName());
 
 		modelIndex.add(modelNode, Property.General.NAME, model.getName());
@@ -103,13 +105,13 @@ public class CellMLExtractor extends Extractor{
 			modelIndex.add(modelNode, Property.General.ID, model.getMetaId()); 		
 		}
 		
-		extractModelMetadata(modelNode, url);
+		extractModelMetadata(modelNode, url, uID);
 
 		
-		Map<String, Map<Node, Map<String, Node>>> componentNodes = extractCellmlComponents(model.getComponents(), modelNode);
+		Map<String, Map<Node, Map<String, Node>>> componentNodes = extractCellmlComponents(model.getComponents(), modelNode, uID);
 		
 		
-		extractCellmlConnections(model.getComponents(), componentNodes);
+		extractCellmlConnections(model.getComponents(), componentNodes, uID);
 		componentNodes.clear();
 		
 		return documentNode;
@@ -117,16 +119,16 @@ public class CellMLExtractor extends Extractor{
 
 
 
-	private static void extractModelMetadata(Node modelNode, URL url) {
+	private static void extractModelMetadata(Node modelNode, URL url, Long uID) {
 	
 		CmetaContainer cmeta = readCmeta(url);
 		if (cmeta==null) return;
 
 		//create new annotation if there is something...
-		Node annotationNode = graphDB.createNode();
+		Node annotationNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 		annotationNode.addLabel(NodeLabel.Types.ANNOTATION);
-		annotationNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
-		modelNode.createRelationshipTo(annotationNode, AnnotationRelTypes.HAS_ANNOTATION);
+		IdFactory.instance().addToRelationshipDeleteIndex(annotationNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(annotationNode, AnnotationRelTypes.HAS_ANNOTATION), uID);
 		
 		String[] modelAuthor = StringUtils.split(cmeta.getModel_author());
 		if ((modelAuthor!=null) && (modelAuthor.length > 0)){		
@@ -167,20 +169,20 @@ public class CellMLExtractor extends Extractor{
 			String res = cmeta.getCitation_id();
 			Node resource = annotationIndex.get(Property.General.URI, res).getSingle();
 			if (resource==null){
-				resource = graphDB.createNode();
+				resource = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 				resource.setProperty(Property.General.URI, res);
 				resource.addLabel(NodeLabel.Types.RESOURCE);
 				annotationIndex.add(resource, Property.General.URI, res);
 			}
 			//create a dynamic relationship based on the qualifier
-			annotationNode.createRelationshipTo(resource, RelationshipType.withName("isDescribedBy"));
-			resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO);
+			IdFactory.instance().addToRelationshipDeleteIndex(annotationNode.createRelationshipTo(resource, RelationshipType.withName("isDescribedBy")), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO), uID);
 		}
 		
 	}
 
 	private static void extractCellmlConnections(HashMap<String, CellMLComponent> components,
-			Map<String, Map<Node, Map<String, Node>>> componentNodes) {
+			Map<String, Map<Node, Map<String, Node>>> componentNodes, Long uID) {
 		
 		for (Iterator<CellMLComponent> iComp = components.values().iterator(); iComp.hasNext();) {
 			CellMLComponent comp = (CellMLComponent) iComp.next();
@@ -202,7 +204,9 @@ public class CellMLExtractor extends Extractor{
 						try {
 							in  = componentNodes.get(comp.getName()).values().iterator().next().get(var.getName());
 							out = componentNodes.get(connectedComponent.getName()).values().iterator().next().get(connectedVar.getName()); 	
-							out.createRelationshipTo(in, CellmlRelTypes.IS_CONNECTED_TO).setProperty(Property.CellML.ISPRIVATECONNECTION, true);
+							Relationship r = out.createRelationshipTo(in, CellmlRelTypes.IS_CONNECTED_TO);
+							r.setProperty(Property.CellML.ISPRIVATECONNECTION, true);
+							IdFactory.instance().addToRelationshipDeleteIndex(r, uID);
 						} catch (NullPointerException e) {
 							// nothing
 						}
@@ -220,7 +224,9 @@ public class CellMLExtractor extends Extractor{
 						in  = componentNodes.get(comp.getName()).values().iterator().next().get(var.getName());
 						out = componentNodes.get(connectedComponent.getName()).values().iterator().next().get(connectedVar.getName()); 	
 						
-						out.createRelationshipTo(in, CellmlRelTypes.IS_CONNECTED_TO).setProperty(Property.CellML.ISPRIVATECONNECTION, false);
+						Relationship r = out.createRelationshipTo(in, CellmlRelTypes.IS_CONNECTED_TO);
+						r.setProperty(Property.CellML.ISPRIVATECONNECTION, false);
+						IdFactory.instance().addToRelationshipDeleteIndex(r, uID);
 					}										
 				}
 			}
@@ -230,15 +236,15 @@ public class CellMLExtractor extends Extractor{
 	}
 
 	private static Map<String, Map<Node, Map<String, Node>>> extractCellmlComponents(
-			HashMap<String, CellMLComponent> components, Node modelNode) {
+			HashMap<String, CellMLComponent> components, Node modelNode, Long uID) {
 		
 		Map<String, Map<Node, Map<String, Node>>> componentNodes = new HashMap<String, Map<Node, Map<String, Node>>>();		
 		
 		for (Iterator<CellMLComponent> iterator = components.values().iterator(); iterator.hasNext();) {
 			CellMLComponent comp = (CellMLComponent) iterator.next();
-			Node componentNode = graphDB.createNode();			
-			componentNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
-			modelNode.createRelationshipTo(componentNode, CellmlRelTypes.HAS_COMPONENT);
+			Node componentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);			
+			IdFactory.instance().addToRelationshipDeleteIndex(componentNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(componentNode, CellmlRelTypes.HAS_COMPONENT), uID);
 			componentNode.addLabel(NodeLabel.Types.CELLML_COMPONENT);
 			
 			componentNode.setProperty(Property.General.NAME, comp.getName());			
@@ -249,12 +255,12 @@ public class CellMLExtractor extends Extractor{
 				modelIndex.add(modelNode, Property.CellML.COMPONENT, comp.getMetaId());
 			}
 			
-			Map<String, Node> variableNodes = extractCellmlVariables(comp.getVariables(), componentNode, modelNode);			
+			Map<String, Node> variableNodes = extractCellmlVariables(comp.getVariables(), componentNode, modelNode, uID);			
 			Map<Node, Map<String, Node>> compNodeToVariables = new HashMap<Node, Map<String,Node>>();
 			compNodeToVariables.put(componentNode, variableNodes);
 			componentNodes.put(comp.getName(), compNodeToVariables);
 			
-			extractCellmlReactions(comp.getReactions(), componentNode);
+			extractCellmlReactions(comp.getReactions(), componentNode, uID);
 			
 			
 		}
@@ -262,14 +268,14 @@ public class CellMLExtractor extends Extractor{
 		return componentNodes;
 	}
 
-	private static void extractCellmlReactions(List<CellMLReaction> reactions,	Node componentNode) {
+	private static void extractCellmlReactions(List<CellMLReaction> reactions,	Node componentNode, Long uID) {
 
 		for (Iterator<CellMLReaction> iterator = reactions.iterator(); iterator.hasNext();) {
 			CellMLReaction react = (CellMLReaction) iterator.next();
-			Node reactionNode = graphDB.createNode();
+			Node reactionNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 			reactionNode.addLabel(NodeLabel.Types.CELLML_REACTION);
-			reactionNode.createRelationshipTo(componentNode, DatabaseRelTypes.BELONGS_TO);
-			componentNode.createRelationshipTo(reactionNode, CellmlRelTypes.HAS_REACTION);
+			IdFactory.instance().addToRelationshipDeleteIndex(reactionNode.createRelationshipTo(componentNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(componentNode.createRelationshipTo(reactionNode, CellmlRelTypes.HAS_REACTION), uID);
 			
 			reactionNode.setProperty( Property.CellML.REVERSIBLE, react.isReversible());
 		}
@@ -277,15 +283,15 @@ public class CellMLExtractor extends Extractor{
 	}
 
 	private static Map<String, Node> extractCellmlVariables(HashMap<String, CellMLVariable>  variableSet,
-			Node componentNode, Node modelNode) {
+			Node componentNode, Node modelNode, Long uID) {
 		Map<String, Node> variableNodes = new HashMap<String, Node>();
 		
 		for (Iterator<CellMLVariable> iterator = variableSet.values().iterator(); iterator.hasNext();) {
 			CellMLVariable variable = (CellMLVariable) iterator.next();
 
-			Node variableNode = graphDB.createNode();
-			variableNode.createRelationshipTo(componentNode, DatabaseRelTypes.BELONGS_TO);
-			componentNode.createRelationshipTo(variableNode, CellmlRelTypes.HAS_VARIABLE);
+			Node variableNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(variableNode.createRelationshipTo(componentNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(componentNode.createRelationshipTo(variableNode, CellmlRelTypes.HAS_VARIABLE), uID);
 			variableNode.addLabel(NodeLabel.Types.CELLML_VARIABLE);
 			variableNode.setProperty(Property.General.NAME, variable.getName());
 			modelIndex.add(modelNode, Property.CellML.VARIABLE, variable.getName());

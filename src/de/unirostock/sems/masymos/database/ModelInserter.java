@@ -10,10 +10,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
-import org.neo4j.graphdb.index.IndexManager;
-import org.neo4j.helpers.collection.MapUtil;
 
-import de.unirostock.sems.masymos.analyzer.AnnotationIndexAnalyzer;
 import de.unirostock.sems.masymos.annotation.AnnotationResolverUtil;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
@@ -22,16 +19,16 @@ import de.unirostock.sems.masymos.extractor.Extractor;
 
 public class ModelInserter {
 
-	static GraphDatabaseService graphDB = Manager.instance().getDatabase();
+	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 
-	public static Boolean addModel(String fileID, String versionId,
+	public static Long addModelVersion(String fileID, String versionId,
 			Map<String, List<String>> predVersionIdMap, URL XMLdoc,
 			String meta, String modelType) {
-
-		//Node modelNode = null; 
+		Long uID = IdFactory.instance().getID();
+		
 		Node documentNode = null;
 		try {
-			documentNode = Extractor.extractStoreIndex(XMLdoc, modelType, versionId);
+			documentNode = Extractor.extractStoreIndex(XMLdoc, modelType, versionId, uID);
 		} catch (Exception e) {
 			e.printStackTrace();
 			documentNode = null;
@@ -39,7 +36,7 @@ public class ModelInserter {
 		
 		try ( Transaction tx = graphDB.beginTx() ) {
 			if( documentNode == null ) {
-				documentNode = graphDB.createNode();
+				documentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 				documentNode.addLabel(NodeLabel.Types.DOCUMENT);
 			}
 			
@@ -50,6 +47,7 @@ public class ModelInserter {
 			propertyMap.put(Property.General.URI, XMLdoc.toString());
 			propertyMap.put(Property.General.FILEID, fileID);
 			Extractor.setExternalDocumentInformation(documentNode, propertyMap);
+			Extractor.setDocumentUID(documentNode, uID);
 			
 			tx.success();
 		} catch (Exception e) {
@@ -58,7 +56,7 @@ public class ModelInserter {
 			
 		
 		if (documentNode == null)
-			return false;
+			return Long.MIN_VALUE;
 
 		if ((predVersionIdMap != null) && !predVersionIdMap.isEmpty()) {
 
@@ -67,7 +65,7 @@ public class ModelInserter {
 				String fid = (String) fidIterator.next();
 				for (Iterator<String> vIdIterator = predVersionIdMap.get(fid).iterator(); vIdIterator.hasNext();) {
 					String vid = (String) vIdIterator.next();
-					Node predNode = ModelLookup.getModelVersionNode(fid, vid);
+					Node predNode = ModelLookup.getDocumentVersionNode(fid, vid);
 					try (Transaction tx = graphDB.beginTx()) {
 						predNode.createRelationshipTo(documentNode, Relation.DatabaseRelTypes.HAS_SUCCESSOR);
 						documentNode.createRelationshipTo(predNode, Relation.DatabaseRelTypes.HAS_PREDECESSOR);
@@ -79,7 +77,41 @@ public class ModelInserter {
 			}
 
 		}
-		return (documentNode != null);
+		return uID;
+	}
+	
+	
+	public static Long addModel(String fileID, URL url, String modelType) {
+		Long uID = IdFactory.instance().getID();
+		
+		Node documentNode = null;
+		try {
+			documentNode = Extractor.extractStoreIndex(url, modelType, uID);
+		} catch (Exception e) {
+			e.printStackTrace();
+			documentNode = null;
+		}
+		
+		try ( Transaction tx = graphDB.beginTx() ) {
+			if( documentNode == null ) {
+				documentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+				documentNode.addLabel(NodeLabel.Types.DOCUMENT);
+			}
+			
+			Map<String, String> propertyMap = new HashMap<String, String>();
+	
+			propertyMap.put(Property.General.URI, url.toString());
+			propertyMap.put(Property.General.FILEID, fileID);
+			Extractor.setExternalDocumentInformation(documentNode, propertyMap);
+			Extractor.setDocumentUID(documentNode, uID);
+			
+			tx.success();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Long.MIN_VALUE;
+		}
+		
+		return uID;
 	}
 	
 	public static Boolean buildIndex(Boolean dropExistingIndex){
@@ -88,10 +120,12 @@ public class ModelInserter {
 			try(Transaction ignore = graphDB.beginTx()){
 				Index<Node> annotationIndex = Manager.instance().getAnnotationIndex();
 				annotationIndex.delete();
-				annotationIndex = Manager.instance().getDatabase().index().forNodes("annotationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", AnnotationIndexAnalyzer.class.getName()));
+				//annotationIndex = Manager.instance().getDatabase().index().forNodes("annotationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", AnnotationIndexAnalyzer.class.getName()));
 				//((LuceneIndex<Node>) annotationIndex).setCacheCapacity( Property.General.URI, 30000 );
 				ignore.success();
 			}
+			Manager.instance().createAnnotationIndex();
+			
 		}
 		AnnotationResolverUtil.instance().setIndexLocked(false);
 		AnnotationResolverUtil.instance().fillAnnotationFullTextIndex();

@@ -40,7 +40,8 @@ import de.unirostock.sems.masymos.configuration.Relation.DatabaseRelTypes;
 import de.unirostock.sems.masymos.configuration.Relation.DocumentRelTypes;
 import de.unirostock.sems.masymos.configuration.Relation.SbmlRelTypes;
 import de.unirostock.sems.masymos.data.PersonWrapper;
-import de.unirostock.sems.masymos.database.traverse.DBModelTraverser;
+import de.unirostock.sems.masymos.database.IdFactory;
+import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.extractor.Extractor;
 
 
@@ -48,11 +49,11 @@ public class SBMLExtractor extends Extractor{
 	
 	private static SBMLReader reader = new SBMLReader();
 
-	public static Node extractStoreIndex(InputStream stream, String versionID) throws XMLStreamException, IOException{
+	public static Node extractStoreIndexSBML(InputStream stream, String versionID, Long uID) throws XMLStreamException, IOException{
 		
 		Node documentNode = null;		
 		try (Transaction tx = graphDB.beginTx()) {
-			documentNode = extractFromSBML(stream, versionID);
+			documentNode = extractFromSBML(stream, versionID, uID);
 			tx.success();
 		} catch (XMLStreamException e) {
 			documentNode = null;
@@ -67,24 +68,24 @@ public class SBMLExtractor extends Extractor{
 
 
 
-	private static void extractSBOTerm(String sboTerm, Node referenceNode){
-		if (StringUtils.isEmpty(sboTerm)) return;
+	private static void extractSBOTerm(String sboTerm, Node referenceNode, Long uID){
+		if (StringUtils.isBlank(sboTerm)) return;
 		
 		String sboUri = "urn:miriam:biomodels.sbo:" + sboTerm;
 		
-		Node annotationNode = DBModelTraverser.fromNodeToAnnotation(referenceNode);
+		Node annotationNode = ModelTraverser.fromNodeToAnnotation(referenceNode);
 		
 		//create if not already existing
 		if (annotationNode==null) {
-			annotationNode = graphDB.createNode();
+			annotationNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 			annotationNode.addLabel(NodeLabel.Types.ANNOTATION);
-			annotationNode.createRelationshipTo(referenceNode, DatabaseRelTypes.BELONGS_TO);
-			referenceNode.createRelationshipTo(annotationNode, AnnotationRelTypes.HAS_ANNOTATION);
+			IdFactory.instance().addToRelationshipDeleteIndex(annotationNode.createRelationshipTo(referenceNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(referenceNode.createRelationshipTo(annotationNode, AnnotationRelTypes.HAS_ANNOTATION), uID);
 		}
 		
 		Node resource = annotationIndex.get(Property.General.URI, sboUri).getSingle();
 		if (resource==null){
-			resource = graphDB.createNode();
+			resource = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 			resource.setProperty(Property.General.URI, sboUri);
 			resource.addLabel(NodeLabel.Types.RESOURCE);
 			annotationIndex.add(resource, Property.General.URI, sboUri);
@@ -92,16 +93,16 @@ public class SBMLExtractor extends Extractor{
 			//annotationFullTextIndex.add(resource, Property.General.RESOURCE, AnnotationResolverUtil.getSingleURIFullText(sboUri));
 		}
 		//create a dynamic relationship based on the qualifier
-		annotationNode.createRelationshipTo(resource, SbmlRelTypes.HAS_SBOTERM);
-		resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO);
+		IdFactory.instance().addToRelationshipDeleteIndex(annotationNode.createRelationshipTo(resource, SbmlRelTypes.HAS_SBOTERM), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO), uID);
 	}
 
-	private static void extractAnnotationNodes(Annotation annotation, Node referenceNode, Node modelNode) {
+	private static void extractAnnotationNodes(Annotation annotation, Node referenceNode, Node modelNode, Long uID) {
 		//if no annotation is present return
 		if ((annotation==null) ||  (annotation.isEmpty())) return;
 	
 		//create annotation node
-		Node annotationNode = graphDB.createNode();
+		Node annotationNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 		annotationNode.addLabel(NodeLabel.Types.ANNOTATION);
 		History history = annotation.getHistory();
 		
@@ -157,30 +158,30 @@ public class SBMLExtractor extends Extractor{
 				//test if resource already exists
 				Node resource = annotationIndex.get(Property.General.URI, res).getSingle();
 				if (resource==null){
-					resource = graphDB.createNode();
+					resource = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 					resource.setProperty(Property.General.URI, res);
 					resource.addLabel(NodeLabel.Types.RESOURCE);
 					annotationIndex.add(resource, Property.General.URI, res);
 				}
 				//create a dynamic relationship based on the qualifier
-				annotationNode.createRelationshipTo(resource, RelationshipType.withName(q.getElementNameEquivalent()));
-				resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO);
+				IdFactory.instance().addToRelationshipDeleteIndex(annotationNode.createRelationshipTo(resource, RelationshipType.withName(q.getElementNameEquivalent())), uID);
+				IdFactory.instance().addToRelationshipDeleteIndex(resource.createRelationshipTo(annotationNode, DatabaseRelTypes.BELONGS_TO), uID);
 			}
 		}
 	
-		annotationNode.createRelationshipTo(referenceNode, DatabaseRelTypes.BELONGS_TO);
-		referenceNode.createRelationshipTo(annotationNode, AnnotationRelTypes.HAS_ANNOTATION);
+		IdFactory.instance().addToRelationshipDeleteIndex(annotationNode.createRelationshipTo(referenceNode, DatabaseRelTypes.BELONGS_TO), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(referenceNode.createRelationshipTo(annotationNode, AnnotationRelTypes.HAS_ANNOTATION), uID);
 	
 	}
 
-	private static Node extractFromSBML(InputStream stream, String versionID) throws XMLStreamException {
+	private static Node extractFromSBML(InputStream stream, String versionID, Long uID) throws XMLStreamException {
 		
 		SBMLDocument doc = null;
 		Model model = null;
 		doc = reader.readSBMLFromStream(stream);
 		
 		//create SBML document
-		Node documentNode = graphDB.createNode();
+		Node documentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
 		documentNode.addLabel(NodeLabel.Types.DOCUMENT);
 		documentNode.setProperty(Property.SBML.LEVEL, doc.getLevel());
 		documentNode.setProperty(Property.SBML.VERSION, doc.getVersion());
@@ -189,9 +190,9 @@ public class SBMLExtractor extends Extractor{
 		
 		//create SBML model
 		model = doc.getModel();
-		Node modelNode = graphDB.createNode();
-		documentNode.createRelationshipTo(modelNode, DocumentRelTypes.HAS_MODEL);
-		modelNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO);
+		Node modelNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(documentNode.createRelationshipTo(modelNode, DocumentRelTypes.HAS_MODEL), uID);
+		IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);
 		modelNode.setProperty(Property.General.NAME, model.getName());
 		modelNode.setProperty(Property.General.ID, model.getId());
 		modelNode.addLabel(NodeLabel.Types.MODEL);
@@ -201,53 +202,39 @@ public class SBMLExtractor extends Extractor{
 		modelIndex.add(modelNode, Property.General.ID, model.getId());
 
 		//process annotations and link them to the model
-		extractAnnotationNodes(model.getAnnotation(), modelNode, modelNode);
+		extractAnnotationNodes(model.getAnnotation(), modelNode, modelNode, uID);
 		//process the SBO term
-		extractSBOTerm(model.getSBOTermID(), modelNode);
+		extractSBOTerm(model.getSBOTermID(), modelNode, uID);
 		//process the compartments
-		Map<String, Node> compartmentNodes = extractSBMLCompartments(model.getListOfCompartments(), modelNode);
+		Map<String, Node> compartmentNodes = extractSBMLCompartments(model.getListOfCompartments(), modelNode, uID);
 		//process the species
-		Map<String, Node> speciesNodes = extractSBMLSpecies(model.getListOfSpecies(), modelNode, compartmentNodes);
+		Map<String, Node> speciesNodes = extractSBMLSpecies(model.getListOfSpecies(), modelNode, compartmentNodes, uID);
 		//process the reactions
-		extractSBMLReactions(model.getListOfReactions(), modelNode, compartmentNodes, speciesNodes);
+		extractSBMLReactions(model.getListOfReactions(), modelNode, compartmentNodes, speciesNodes, uID);
 		//process the parameters
-		extractSBMLParameters(model.getListOfParameters(), modelNode);
+		extractSBMLParameters(model.getListOfParameters(), modelNode, uID);
 		//process the rules
-		extractSBMLRules(model.getListOfRules(), modelNode);
+		extractSBMLRules(model.getListOfRules(), modelNode, uID);
 		//process the events
-		extractSBMLEvents(model.getListOfEvents(), modelNode);
+		extractSBMLEvents(model.getListOfEvents(), modelNode, uID);
 		//process the functions
-		extractSBMLFunctions(model.getListOfFunctionDefinitions(), modelNode);
-		
-
-//		if (publication!=null) {
-//			Node annotationNode = DBModelTraverser.fromNodeToAnnotation(modelNode);
-//			if (annotationNode==null){
-//				annotationNode = graphDB.createNode();
-//				annotationNode.addLabel(NodeLabel.Types.ANNOTATION);
-//				annotationNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
-//				modelNode.createRelationshipTo(annotationNode, AnnotationRelTypes.HAS_ANNOTATION);
-//			} 
-//			Extractor.processPublication(publication, annotationNode, modelNode);
-//				
-//		}
-//TODO code some pubmed wrapper		
+		extractSBMLFunctions(model.getListOfFunctionDefinitions(), modelNode, uID);	
 		
 		return documentNode;
 	}
 	
 
 	private static void extractSBMLReactions(ListOf<Reaction> listOfReaction,
-			Node modelNode, Map<String, Node> compartmentList, Map<String, Node> speciesList) {
+			Node modelNode, Map<String, Node> compartmentList, Map<String, Node> speciesList, Long uID) {
 
 		for (Iterator<Reaction> itReac = listOfReaction.iterator(); itReac
 				.hasNext();) {
 			
 			//iterate through reactions 
 			Reaction reaction = (Reaction) itReac.next();
-			Node reactionNode = graphDB.createNode();
-			modelNode.createRelationshipTo(reactionNode, SbmlRelTypes.HAS_REACTION);
-			reactionNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
+			Node reactionNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(reactionNode, SbmlRelTypes.HAS_REACTION), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(reactionNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
 			
 			reactionNode.setProperty(Property.General.NAME, reaction.getName());
 			reactionNode.setProperty(Property.General.ID, reaction.getId());
@@ -261,8 +248,8 @@ public class SBMLExtractor extends Extractor{
 			Node compartmentNode = compartmentList.get(reaction.getCompartment());
 			if (compartmentNode!=null)
 			{
-				reactionNode.createRelationshipTo(compartmentNode, SbmlRelTypes.IS_LOCATED_IN);
-			    compartmentNode.createRelationshipTo(reactionNode, SbmlRelTypes.CONTAINS_REACTION);
+				IdFactory.instance().addToRelationshipDeleteIndex(reactionNode.createRelationshipTo(compartmentNode, SbmlRelTypes.IS_LOCATED_IN), uID);
+				IdFactory.instance().addToRelationshipDeleteIndex(compartmentNode.createRelationshipTo(reactionNode, SbmlRelTypes.CONTAINS_REACTION), uID);
 			}
 			
 			//link species used as modifier to reaction
@@ -270,8 +257,8 @@ public class SBMLExtractor extends Extractor{
 			for (Iterator<ModifierSpeciesReference> itLom = lom.iterator(); itLom.hasNext();) {
 				ModifierSpeciesReference msr = (ModifierSpeciesReference) itLom.next();
 				if ((msr.getSpecies()!=null) && speciesList.containsKey(msr.getSpecies())) {
-					reactionNode.createRelationshipTo(speciesList.get(msr.getSpecies()), SbmlRelTypes.HAS_MODIFIER);
-					speciesList.get(msr.getSpecies()).createRelationshipTo(reactionNode, SbmlRelTypes.IS_MODIFIER);
+					IdFactory.instance().addToRelationshipDeleteIndex(reactionNode.createRelationshipTo(speciesList.get(msr.getSpecies()), SbmlRelTypes.HAS_MODIFIER), uID);
+					IdFactory.instance().addToRelationshipDeleteIndex(speciesList.get(msr.getSpecies()).createRelationshipTo(reactionNode, SbmlRelTypes.IS_MODIFIER), uID);
 				}
 			}
 			
@@ -280,9 +267,8 @@ public class SBMLExtractor extends Extractor{
 			for (Iterator<SpeciesReference> itLop = lop.iterator(); itLop.hasNext();) {
 				SpeciesReference msr = (SpeciesReference) itLop.next();
 				if ((msr.getSpecies()!=null) && speciesList.containsKey(msr.getSpecies())) {
-					reactionNode.createRelationshipTo(speciesList.get(msr.getSpecies()), SbmlRelTypes.HAS_PRODUCT);
-					speciesList.get(msr.getSpecies()).createRelationshipTo(reactionNode, SbmlRelTypes.IS_PRODUCT);
-				}
+					IdFactory.instance().addToRelationshipDeleteIndex(reactionNode.createRelationshipTo(speciesList.get(msr.getSpecies()), SbmlRelTypes.HAS_PRODUCT), uID);
+					IdFactory.instance().addToRelationshipDeleteIndex(speciesList.get(msr.getSpecies()).createRelationshipTo(reactionNode, SbmlRelTypes.IS_PRODUCT), uID);				}
 			}
 			
 			//link species used as reactant to reaction
@@ -290,21 +276,21 @@ public class SBMLExtractor extends Extractor{
 			for (Iterator<SpeciesReference> itLor = lor.iterator(); itLor.hasNext();) {
 				SpeciesReference msr = (SpeciesReference) itLor.next();
 				if ((msr.getSpecies()!=null) && speciesList.containsKey(msr.getSpecies())) {
-					reactionNode.createRelationshipTo(speciesList.get(msr.getSpecies()), SbmlRelTypes.HAS_REACTANT);
-					speciesList.get(msr.getSpecies()).createRelationshipTo(reactionNode, SbmlRelTypes.IS_REACTANT);
+					IdFactory.instance().addToRelationshipDeleteIndex(reactionNode.createRelationshipTo(speciesList.get(msr.getSpecies()), SbmlRelTypes.HAS_REACTANT), uID);
+					IdFactory.instance().addToRelationshipDeleteIndex(speciesList.get(msr.getSpecies()).createRelationshipTo(reactionNode, SbmlRelTypes.IS_REACTANT), uID);
 				}
 			}
 			
 			//extract annotation and link to reaction node
-			extractAnnotationNodes(reaction.getAnnotation(), reactionNode, modelNode);
+			extractAnnotationNodes(reaction.getAnnotation(), reactionNode, modelNode, uID);
 			//process the SBO term
-			extractSBOTerm(reaction.getSBOTermID(), reactionNode);
+			extractSBOTerm(reaction.getSBOTermID(), reactionNode, uID);
 		}
 	}
 
 
 	private static Map<String, Node> extractSBMLSpecies(ListOf<Species> listOfSpecies,
-			Node modelNode, Map<String, Node> compartmentList) {
+			Node modelNode, Map<String, Node> compartmentList, Long uID) {
 
 		Map<String, Node> speciesNodes = new HashMap<String, Node>();
 
@@ -313,9 +299,9 @@ public class SBMLExtractor extends Extractor{
 			
 			//iterate through species and link back to model
 			Species species = (Species) iterator.next();
-			Node speciesNode = graphDB.createNode();
-			modelNode.createRelationshipTo(speciesNode, SbmlRelTypes.HAS_SPECIES);
-			speciesNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
+			Node speciesNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(speciesNode, SbmlRelTypes.HAS_SPECIES), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(speciesNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
 			
 			speciesNode.setProperty(Property.General.NAME, species.getName());
 			speciesNode.setProperty(Property.General.ID, species.getId());
@@ -329,23 +315,23 @@ public class SBMLExtractor extends Extractor{
 			Node compartmentNode = compartmentList.get(species.getCompartment());
 			if (compartmentNode!=null)
 			{
-				speciesNode.createRelationshipTo(compartmentNode, SbmlRelTypes.IS_LOCATED_IN);
-			    compartmentNode.createRelationshipTo(speciesNode, SbmlRelTypes.CONTAINS_SPECIES);
+				IdFactory.instance().addToRelationshipDeleteIndex(speciesNode.createRelationshipTo(compartmentNode, SbmlRelTypes.IS_LOCATED_IN), uID);
+				IdFactory.instance().addToRelationshipDeleteIndex( compartmentNode.createRelationshipTo(speciesNode, SbmlRelTypes.CONTAINS_SPECIES), uID);
 			}
 					
 			//map species id to species for linking reactions
 			speciesNodes.put(species.getId(), speciesNode);
 			
 			//extract annotation an link to species 
-			extractAnnotationNodes(species.getAnnotation(), speciesNode, modelNode);
+			extractAnnotationNodes(species.getAnnotation(), speciesNode, modelNode, uID);
 			//process the SBO term
-			extractSBOTerm(species.getSBOTermID(), speciesNode);
+			extractSBOTerm(species.getSBOTermID(), speciesNode, uID);
 		}
 		return speciesNodes;
 	}
 
 	private static Map<String, Node> extractSBMLCompartments(
-			ListOf<Compartment> listOfCompartments, Node modelNode) {
+			ListOf<Compartment> listOfCompartments, Node modelNode, Long uID) {
 		Map<String, Node> compartmentNodes = new HashMap<String, Node>();
 		
 		for (Iterator<Compartment> iterator = listOfCompartments.iterator(); iterator
@@ -353,9 +339,9 @@ public class SBMLExtractor extends Extractor{
 			
 			//iterate through compartments and link back to model
 			Compartment compartment = (Compartment) iterator.next();
-			Node compartmentNode = graphDB.createNode();
-			modelNode.createRelationshipTo(compartmentNode, SbmlRelTypes.HAS_COMPARTMENT);
-			compartmentNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
+			Node compartmentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(compartmentNode, SbmlRelTypes.HAS_COMPARTMENT), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(compartmentNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
 			
 			compartmentNode.setProperty(Property.General.NAME, compartment.getName());
 			compartmentNode.setProperty(Property.General.ID, compartment.getId());
@@ -369,22 +355,22 @@ public class SBMLExtractor extends Extractor{
 			compartmentNodes.put(compartment.getId(), compartmentNode);
 			
 			//extract annotation and link to compartment
-			extractAnnotationNodes(compartment.getAnnotation(), compartmentNode, modelNode);
+			extractAnnotationNodes(compartment.getAnnotation(), compartmentNode, modelNode, uID);
 			//process the SBO term
-			extractSBOTerm(compartment.getSBOTermID(), compartmentNode);
+			extractSBOTerm(compartment.getSBOTermID(), compartmentNode, uID);
 		}
 		
 		return compartmentNodes;
 	}
 	
 	private static void extractSBMLParameters(
-			ListOf<Parameter> listOfParameters, Node modelNode) {
+			ListOf<Parameter> listOfParameters, Node modelNode, Long uID) {
 		for (Iterator<Parameter> iterator = listOfParameters.iterator(); iterator
 				.hasNext();) {
 			Parameter parameter = (Parameter) iterator.next();
-			Node parameterNode = graphDB.createNode();
-			parameterNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
-			modelNode.createRelationshipTo(parameterNode, Relation.SbmlRelTypes.HAS_PARAMETER);
+			Node parameterNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(parameterNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(parameterNode, Relation.SbmlRelTypes.HAS_PARAMETER), uID);
 			parameterNode.addLabel(NodeLabel.Types.SBML_PARAMETER);
 			
 			//extract parameter properties
@@ -394,71 +380,71 @@ public class SBMLExtractor extends Extractor{
 			modelIndex.add(modelNode, Property.SBML.PARAMETER, parameter.getName());
 			modelIndex.add(modelNode, Property.SBML.PARAMETER, parameter.getId());
 			
-			extractAnnotationNodes(parameter.getAnnotation(), parameterNode, modelNode);
+			extractAnnotationNodes(parameter.getAnnotation(), parameterNode, modelNode, uID);
 			//process the SBO term
-			extractSBOTerm(parameter.getSBOTermID(), parameterNode);
+			extractSBOTerm(parameter.getSBOTermID(), parameterNode, uID);
 		}
 		
 	}
 	
 
 	private static void extractSBMLRules(ListOf<Rule> listOfRules,
-			Node modelNode) {
+			Node modelNode, Long uID) {
 		for (Iterator<Rule> iterator = listOfRules.iterator(); iterator.hasNext();) {
 			Rule rule = (Rule) iterator.next();
-			Node ruleNode = graphDB.createNode();
-			ruleNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
-			modelNode.createRelationshipTo(ruleNode, SbmlRelTypes.HAS_RULE);
+			Node ruleNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(ruleNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(ruleNode, SbmlRelTypes.HAS_RULE), uID);
 			ruleNode.addLabel(NodeLabel.Types.SBML_RULE);
 			
 			//extract rule properties
 			//TODO continue
 			
-			extractAnnotationNodes(rule.getAnnotation(), ruleNode, modelNode);
+			extractAnnotationNodes(rule.getAnnotation(), ruleNode, modelNode, uID);
 			//process the SBO term
-			extractSBOTerm(rule.getSBOTermID(), ruleNode);
+			extractSBOTerm(rule.getSBOTermID(), ruleNode, uID);
 		}
 		
 	}
 	
 
 	private static void extractSBMLFunctions(
-			ListOf<FunctionDefinition> listOfFunctionDefinitions, Node modelNode) {
+			ListOf<FunctionDefinition> listOfFunctionDefinitions, Node modelNode, Long uID) {
 		for (Iterator<FunctionDefinition> iterator = listOfFunctionDefinitions.iterator(); iterator
 				.hasNext();) {
 			FunctionDefinition functionDefinition = (FunctionDefinition) iterator
 					.next();
-			Node functionNode = graphDB.createNode();
-			functionNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
-			modelNode.createRelationshipTo(functionNode, SbmlRelTypes.HAS_FUNCTION);
+			Node functionNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(functionNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(functionNode, SbmlRelTypes.HAS_FUNCTION), uID);
 			functionNode.addLabel(NodeLabel.Types.SBML_FUNCTION);
 			//process function properties
 			functionNode.setProperty(Property.General.NAME, functionDefinition.getName());
 			functionNode.setProperty(Property.General.ID, functionDefinition.getId());
 			//TODO continue
-			extractAnnotationNodes(functionDefinition.getAnnotation(), functionNode, modelNode);
+			extractAnnotationNodes(functionDefinition.getAnnotation(), functionNode, modelNode, uID);
 			//process the SBO term
-			extractSBOTerm(functionDefinition.getSBOTermID(), functionNode);
+			extractSBOTerm(functionDefinition.getSBOTermID(), functionNode, uID);
 		}
 				
 	}
 
 	private static void extractSBMLEvents(ListOf<Event> listOfEvents,
-			Node modelNode) {
+			Node modelNode, Long uID) {
 		for (Iterator<Event> iterator = listOfEvents.iterator(); iterator
 				.hasNext();) {
 			Event event = (Event) iterator.next();
-			Node eventNode = graphDB.createNode();
-			eventNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO);
-			modelNode.createRelationshipTo(eventNode, SbmlRelTypes.HAS_EVENT);
+			Node eventNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(eventNode.createRelationshipTo(modelNode, DatabaseRelTypes.BELONGS_TO), uID);
+			IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(eventNode, SbmlRelTypes.HAS_EVENT), uID);
 			eventNode.addLabel(NodeLabel.Types.SBML_EVENT);
 			//process event properties
 			eventNode.setProperty(Property.General.NAME, event.getName());
 			eventNode.setProperty(Property.General.ID, event.getId());
 			//TODO continue
-			extractAnnotationNodes(event.getAnnotation(), eventNode, modelNode);
+			extractAnnotationNodes(event.getAnnotation(), eventNode, modelNode, uID);
 			//process the SBO term
-			extractSBOTerm(event.getSBOTermID(), eventNode);
+			extractSBOTerm(event.getSBOTermID(), eventNode, uID);
 		}
 		
 		

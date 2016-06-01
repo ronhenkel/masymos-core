@@ -12,7 +12,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
-import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.helpers.collection.MapUtil;
 
 import de.unirostock.sems.masymos.analyzer.AnnotationIndexAnalyzer;
@@ -30,15 +29,18 @@ public class Manager {
  
 	private Index<Node> modelIndex = null;
 	private Index<Node> annotationIndex = null;
-	private Index<Relationship> relationshipIndex = null;
 	private Index<Node> publicationIndex = null;
 	private Index<Node> personIndex = null;
 	private Index<Node> constituentIndex = null;
 	private Index<Node> sedmlIndex = null;
-//	private ReadableIndex<Node> autoNodeIndex = null;
+	private Index<Relationship> relationshipIndex = null;
+	private Index<Node> nodeDeleteIndex = null;
+	private Index<Relationship> relationshipDeleteIndex = null;
 	
-	private Map<String, ReadableIndex<?>> nodeIndexMap = null; 
-	private Map<String, ReadableIndex<?>> relationshipIndexMap = null;
+	
+	
+	private Map<String, Index<Node>> nodeIndexMap = null; 
+	private Map<String, Index<Relationship>> relationshipIndexMap = null;
 
 	private Manager(){
 		if (Config.instance().isWebSeverInstance()){
@@ -66,19 +68,25 @@ public class Manager {
 				
 		try (Transaction tx = graphDb.beginTx())
 		{
+			
+			//Legacy indexing
 			modelIndex = graphDb.index().forNodes("modelIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", ModelIndexAnalyzer.class.getName()));
-			constituentIndex = graphDb.index().forNodes("constituentIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", ConstituentIndexAnalyzer.class.getName()));
-			annotationIndex = graphDb.index().forNodes("annotationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", AnnotationIndexAnalyzer.class.getName()));	
+			constituentIndex = graphDb.index().forNodes("constituentIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", ConstituentIndexAnalyzer.class.getName()));				
 			publicationIndex = graphDb.index().forNodes("publicationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", PublicationIndexAnalyzer.class.getName()));
 			personIndex = graphDb.index().forNodes("personIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", PersonIndexAnalyzer.class.getName()));
-			sedmlIndex = graphDb.index().forNodes("sedmlIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", SedmlndexAnalyzer.class.getName()));
-			
+			sedmlIndex = graphDb.index().forNodes("sedmlIndex", MapUtil.stringMap(IndexManager.PROVIDER, "lucene", "analyzer", SedmlndexAnalyzer.class.getName()));			
 			relationshipIndex = graphDb.index().forRelationships("relationshipIndex");
+			// create Annotation index, index can be re-created 
+			createAnnotationIndex();
+			
+			//Index to manage deletions & updates
+			nodeDeleteIndex = graphDb.index().forNodes("nodeDeleteIndex");
+			relationshipDeleteIndex = graphDb.index().forRelationships("relationshipDeleteIndex");
 			
 			tx.success();
 		}
 		
-		nodeIndexMap = new HashMap<String, ReadableIndex<?>>();
+		nodeIndexMap = new HashMap<String, Index<Node>>();
 		nodeIndexMap.put("modelIndex", modelIndex);
 		nodeIndexMap.put("constituentIndex", constituentIndex);
 		nodeIndexMap.put("annotationIndex", annotationIndex);
@@ -86,8 +94,16 @@ public class Manager {
 		nodeIndexMap.put("personIndex", personIndex);
 		nodeIndexMap.put("sedmlIndex", sedmlIndex);
 
-		relationshipIndexMap = new HashMap<String, ReadableIndex<?>>();
+		relationshipIndexMap = new HashMap<String, Index<Relationship>>();
 		relationshipIndexMap.put("relationshipIndex", relationshipIndex);
+	}
+	
+	public void createAnnotationIndex(){
+		try (Transaction tx = graphDb.beginTx())
+		{
+			annotationIndex = graphDb.index().forNodes("annotationIndex", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "analyzer", AnnotationIndexAnalyzer.class.getName()));
+			tx.success();
+		}	
 	}
 	
 
@@ -112,11 +128,6 @@ public class Manager {
 	}
 
 
-	public Index<Relationship> getRelationshipIndex() {
-		return relationshipIndex;
-	}
-
-
 	public Index<Node> getPublicationIndex() {
 		return publicationIndex;
 	}
@@ -134,10 +145,23 @@ public class Manager {
 	public Index<Node> getSedmlIndex() {
 		return sedmlIndex;
 	}
-
-	public Object clone() throws CloneNotSupportedException {
-		throw new CloneNotSupportedException();
+	
+	public Index<Node> getNodeDeleteIndex() {
+		return nodeDeleteIndex;
 	}
+
+	public Index<Relationship> getRelationshipDeleteIndex() {
+		return relationshipDeleteIndex;
+	}
+	
+	public Map<String, Index<Node>> getNodeIndexMap() {
+		return nodeIndexMap;
+	}
+	
+	public Map<String, Index<Relationship>> getRelationshipIndexMap() {
+		return relationshipIndexMap;
+	}
+
 
 	private static void registerShutdownHook( final GraphDatabaseService graphDb )
 	{
@@ -154,8 +178,8 @@ public class Manager {
 	    } );
 	}
 
-	public Map<String, ReadableIndex<?>> getIndexMap() {
-		return nodeIndexMap;
+	public Object clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
 	}
 
 }

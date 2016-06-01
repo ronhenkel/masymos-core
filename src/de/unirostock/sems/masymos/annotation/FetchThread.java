@@ -21,7 +21,7 @@ import org.neo4j.graphdb.index.Index;
 
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
-import de.unirostock.sems.masymos.database.traverse.DBModelTraverser;
+import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
 import de.unirostock.sems.masymos.util.IndexText;
 
 public class FetchThread extends Thread {
@@ -87,7 +87,7 @@ public class FetchThread extends Thread {
 		{
 			Node resource = annoFull.get(Property.General.URI,uri).getSingle();
 			if (resource==null) {
-				resource = DBModelTraverser.findSingleResourceNodeByURI(uri);
+				resource = DocumentTraverser.findSingleResourceNodeByURI(uri);
 				if (resource==null) throw new NoSuchElementException("URI is not in the index nor in the database");
 				annoFull.add(resource, Property.General.URI, uri);
 				System.out.println("Thread #" + number + ": No node found in index, added " + uri);

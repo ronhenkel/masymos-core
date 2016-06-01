@@ -19,7 +19,7 @@ import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
-import de.unirostock.sems.masymos.database.traverse.DBSedmlTraverser;
+import de.unirostock.sems.masymos.database.traverse.SedmlTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.SedmlFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
@@ -144,7 +144,7 @@ public class SedmlQuery implements IQueryInterface {
 		for (Iterator<Node> hitsIt = hits.iterator(); hitsIt.hasNext();) {		
 			Node node = (Node) hitsIt.next();
 			if (node.hasLabel(NodeLabel.Types.SEDML)){
-				result.add(DBSedmlTraverser.getResultSetSedmlFromNode(node, hits.currentScore()));				
+				result.add(SedmlTraverser.getResultSetSedmlFromNode(node, hits.currentScore()));				
 			}
 		}
 		return result;

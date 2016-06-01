@@ -20,7 +20,7 @@ import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.database.Manager;
-import de.unirostock.sems.masymos.database.traverse.DBModelTraverser;
+import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.PublicationFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
@@ -145,7 +145,7 @@ public class PublicationQuery implements IQueryInterface {
 		for (Iterator<Node> hitsIt = hits.iterator(); hitsIt.hasNext();) {		
 			Node node = (Node) hitsIt.next();
 			if (node.hasLabel(NodeLabel.Types.PUBLICATION)){
-				result.addAll(DBModelTraverser.getModelResultSetFromNode(node, hits.currentScore(),"PublicationIndex"));				
+				result.addAll(ModelTraverser.getModelResultSetFromNode(node, hits.currentScore(),"PublicationIndex"));				
 			}
 		}
 		return result;
@@ -170,7 +170,7 @@ public class PublicationQuery implements IQueryInterface {
 									(String)node.getProperty(Property.Publication.AFFILIATION, ""),
 									(String)node.getProperty(Property.Publication.YEAR, ""));
 				List<PersonWrapper> personList = new LinkedList<PersonWrapper>();
-				List<Node> personNodes = DBModelTraverser.getPersonFromPublication(node);
+				List<Node> personNodes = ModelTraverser.getPersonFromPublication(node);
 				for (Iterator<Node> personNodeIt = personNodes.iterator(); personNodeIt.hasNext();) {
 					Node personNode = (Node) personNodeIt.next();
 					if (personNode.hasLabel(NodeLabel.Types.PERSON)){
@@ -182,7 +182,7 @@ public class PublicationQuery implements IQueryInterface {
 					}
 				}
 				prs.setAuthors(personList);
-				List<Node> documentNodes = DBModelTraverser.getDocumentsFromNode(node);
+				List<Node> documentNodes = ModelTraverser.getDocumentsFromNode(node);
 				for (Iterator<Node> docNodeIt = documentNodes.iterator(); docNodeIt.hasNext();) {
 					Node docNode = (Node) docNodeIt.next();
 					if (docNode.hasProperty(Property.General.URI)) prs.addRelatedModelURI((String)docNode.getProperty(Property.General.URI));

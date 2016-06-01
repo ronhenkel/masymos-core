@@ -35,6 +35,8 @@ public class Property {
 		public final static  String RESOURCETEXT = "RESOURCETEXT";
 		public final static  String NONRDF = "NONRDF";
 		public final static  String IS_INDEXED = "ISINDEXED";
+		public final static  String UID = "UID";
+		
 	
 	}
 	

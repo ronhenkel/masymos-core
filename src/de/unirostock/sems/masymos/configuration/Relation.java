@@ -123,11 +123,23 @@ public class Relation {
 	     * Relations to describe relation
 	     */
 	    LINKS_TO_MODEL,
-	    LINKS_TO_SIMULATION
+	    LINKS_TO_SIMULATION,
+	    OBSERVES,
+	    IS_OBSERVED_BY
 	    
 	}
 	
-	
+	public static enum OntologyLinkRelTypes implements RelationshipType
+	{   
+	    /*
+	     * Relations to describe link between a resource and an ontology entry
+	     */
+		ENTITY_TO_SBO,
+		ENTITY_TO_GO,
+		ENTITY_TO_CHEBI,
+		ENTITY_TO_KISAO
+	    
+	}
 	
 	
 }
