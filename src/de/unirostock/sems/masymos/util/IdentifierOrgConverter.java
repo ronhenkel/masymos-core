@@ -1,10 +1,5 @@
 package de.unirostock.sems.masymos.util;
 
-import org.apache.commons.lang3.StringUtils;
-
-import uk.ac.ebi.miriam.lib.MiriamLink;
-
-
 public class IdentifierOrgConverter {
 /*	
 	public static String convertFromIdentifierOrgToMiriam(String uri){
