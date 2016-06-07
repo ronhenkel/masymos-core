@@ -12,10 +12,6 @@ public class RankerHandler {
 	private LinkedHashMap<String, Integer> modelIDRankingMap = new LinkedHashMap<String, Integer>();
 	private ArrayList<String> modelIDList = new ArrayList<String>();
 	
-	public ArrayList<String> getModelIDList(){
-		return this.modelIDList;
-	}
-	
 	
 	public RankerHandler(List<ModelResultSet> rankerList){
 		int count = 1;
@@ -28,6 +24,11 @@ public class RankerHandler {
 				modelIDList.add(model.getModelID());
 				count++;
 			}
+	}
+	
+	
+	public ArrayList<String> getModelIDList(){
+		return this.modelIDList;
 	}
 	
 	
