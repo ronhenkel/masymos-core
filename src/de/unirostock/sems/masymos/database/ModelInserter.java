@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -83,6 +84,7 @@ public class ModelInserter {
 	
 	public static Long addModel(String fileID, URL url, String modelType) {
 		Long uID = IdFactory.instance().getID();
+		modelType = StringUtils.upperCase(modelType);
 		
 		Node documentNode = null;
 		try {

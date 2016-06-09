@@ -2,6 +2,8 @@ package de.unirostock.sems.masymos.util;
 
 import java.io.UnsupportedEncodingException;
 import java.text.Normalizer;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,6 +33,33 @@ public class IndexText {
 		
 		final byte[] utf8Bytes = text.getBytes("UTF-8");
 		return (utf8Bytes.length > (max - 1));
+	}
+	
+	
+	public static String expandTermsSpecialChars(String in){
+		if ((StringUtils.length(in)<5) || !StringUtils.containsAny(in, '_', ':', '.', '-')) return in;
+		
+		LinkedList<String> termList = new LinkedList<String>();
+		String[] terms = StringUtils.split(in);
+		for (int i = 0; i < terms.length; i++) {
+			String term = terms[i];
+			termList.add(term);
+			if (!StringUtils.containsAny(term, '_', ':', '.', '-')) continue;
+			
+			String[] uSplit = StringUtils.splitByCharacterType(StringUtils.lowerCase(term));
+			termList.addAll(java.util.Arrays.asList(uSplit));
+		}
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append(" ");
+		for (Iterator<String> iterator = termList.iterator(); iterator.hasNext();) {
+			String term = (String) iterator.next();
+			if ((StringUtils.length(term) < 2) || StringUtils.isBlank(term)  || StringUtils.containsAny(term, '_', ':', '.', '-')) continue;
+			sb.append(term);
+			sb.append(" ");
+		}
+		
+		return sb.toString();
 	}
 
 }

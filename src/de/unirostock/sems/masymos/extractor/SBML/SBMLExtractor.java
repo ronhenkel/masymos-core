@@ -43,6 +43,7 @@ import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.extractor.Extractor;
+import de.unirostock.sems.masymos.util.IndexText;
 
 
 public class SBMLExtractor extends Extractor{
@@ -198,8 +199,8 @@ public class SBMLExtractor extends Extractor{
 		modelNode.addLabel(NodeLabel.Types.MODEL);
 		modelNode.addLabel(NodeLabel.Types.SBML_MODEL);
 		//index model name and id
-		modelIndex.add(modelNode, Property.General.NAME, model.getName());
-		modelIndex.add(modelNode, Property.General.ID, model.getId());
+		modelIndex.add(modelNode, Property.General.NAME, IndexText.expandTermsSpecialChars(model.getName()));
+		modelIndex.add(modelNode, Property.General.ID, IndexText.expandTermsSpecialChars(model.getId()));
 
 		//process annotations and link them to the model
 		extractAnnotationNodes(model.getAnnotation(), modelNode, modelNode, uID);
@@ -241,8 +242,8 @@ public class SBMLExtractor extends Extractor{
 			reactionNode.addLabel(NodeLabel.Types.SBML_REACTION);
 			
 			//index mapping reaction properties to model
-			modelIndex.add(modelNode, Property.SBML.REACTION, reaction.getName());
-			modelIndex.add(modelNode, Property.SBML.REACTION, reaction.getId());
+			modelIndex.add(modelNode, Property.SBML.REACTION, IndexText.expandTermsSpecialChars(reaction.getName()));
+			modelIndex.add(modelNode, Property.SBML.REACTION, IndexText.expandTermsSpecialChars(reaction.getId()));
 			
 			//link reaction and compartment (used in SBML???)
 			Node compartmentNode = compartmentList.get(reaction.getCompartment());
@@ -308,8 +309,8 @@ public class SBMLExtractor extends Extractor{
 			speciesNode.addLabel(NodeLabel.Types.SBML_SPECIES);
 			
 			//index mapping model and species properties
-			modelIndex.add(modelNode, Property.SBML.SPECIES, species.getName());
-			modelIndex.add(modelNode, Property.SBML.SPECIES, species.getId());
+			modelIndex.add(modelNode, Property.SBML.SPECIES, IndexText.expandTermsSpecialChars(species.getName()));
+			modelIndex.add(modelNode, Property.SBML.SPECIES, IndexText.expandTermsSpecialChars(species.getId()));
 			
 			//create relation between compartment and species
 			Node compartmentNode = compartmentList.get(species.getCompartment());
@@ -348,8 +349,8 @@ public class SBMLExtractor extends Extractor{
 			compartmentNode.addLabel(NodeLabel.Types.SBML_COMPARTMENT);
 			
 			//index to map model to compartment properties
-			modelIndex.add(modelNode, Property.SBML.COMPARTMENT, compartment.getName());
-			modelIndex.add(modelNode, Property.SBML.COMPARTMENT, compartment.getId());
+			modelIndex.add(modelNode, Property.SBML.COMPARTMENT, IndexText.expandTermsSpecialChars(compartment.getName()));
+			modelIndex.add(modelNode, Property.SBML.COMPARTMENT, IndexText.expandTermsSpecialChars(compartment.getId()));
 			
 			//map compartment id to node for linking species
 			compartmentNodes.put(compartment.getId(), compartmentNode);
