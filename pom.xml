@@ -11,7 +11,7 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-enterprise</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -23,8 +23,6 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.neo4j</groupId> <artifactId>neo4j-ha</artifactId> 
-			<version>2.0.0</version> </dependency> -->
 		<dependency>
 			<groupId>uk.ac.ebi.miriam</groupId>
 			<artifactId>miriam-lib</artifactId>
@@ -55,20 +53,6 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.7.2</version>
 		</dependency>
-		<!-- <dependency> <groupId>com.io7m.xom</groupId> <artifactId>xom</artifactId> 
-			<version>1.2.10</version> </dependency> -->
-		<dependency>
-			<groupId>org.jsoup</groupId>
-			<artifactId>jsoup</artifactId>
-			<version>1.7.2</version>
-		</dependency>
-		<!-- <dependency> <groupId>com.github.ansell.owlapi</groupId> <artifactId>owlapi-api</artifactId> 
-			<version>3.4.9.2-ansell</version> </dependency> -->
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.3</version>
-		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
@@ -84,35 +68,69 @@
 			<artifactId>jfact</artifactId>
 			<version>4.0.0</version>
 		</dependency>
-
-		<dependency>
+ 		<dependency>
 			<groupId>org.sbgn</groupId>
 			<artifactId>sbgn-SEMS</artifactId>
 			<version>2</version>
 		</dependency>
-
-		<!-- <dependency> <groupId>com.hermit-reasoner</groupId> <artifactId>org.semanticweb.hermit</artifactId> 
-			<version>1.3.8.4</version> </dependency> -->
 		<dependency>
 			<groupId>de.unirostock.sems</groupId>
 			<artifactId>BiVeS-CellML</artifactId>
 			<version>1.6.2</version>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.7</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-nop</artifactId>
-			<version>1.7.7</version>
-		</dependency>
+		
+		
+		
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.2</version>
 		</dependency>
+		<!-- 		
+		<dependency>
+    		<groupId>org.biopax.paxtools</groupId>
+    		<artifactId>paxtools-core</artifactId>
+    		<version>4.3.1</version>
+		</dependency>
+		-->
+		
+		<!-- logging stuff -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+		<!--
+    	<dependency>
+    		<groupId>org.slf4j</groupId>
+    		<artifactId>slf4j-log4j12</artifactId>
+    		<version>1.7.21</version>
+		</dependency>
+		--> 
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
+			<version>1.7.21</version>
+		</dependency>
+		<!-- 
+		<dependency>
+    		<groupId>org.slf4j</groupId>
+    		<artifactId>slf4j-nop</artifactId>
+    		<version>1.7.21</version>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		<!-- 
+		<dependency>
+  			<groupId>org.slf4j</groupId>
+  			<artifactId>jcl-over-slf4j</artifactId>
+  			<version>1.7.21</version>
+		</dependency>
+		 -->
 	</dependencies>
 	<repositories>
 		<repository>

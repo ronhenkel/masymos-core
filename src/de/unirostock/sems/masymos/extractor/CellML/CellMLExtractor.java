@@ -39,6 +39,7 @@ import de.unirostock.sems.masymos.data.PublicationWrapper;
 import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.extractor.Extractor;
 import de.unirostock.sems.masymos.util.CmetaContainer;
+import de.unirostock.sems.masymos.util.IndexText;
 
 
 
@@ -95,7 +96,7 @@ public class CellMLExtractor extends Extractor{
 		IdFactory.instance().addToRelationshipDeleteIndex(modelNode.createRelationshipTo(documentNode, DatabaseRelTypes.BELONGS_TO), uID);
 		modelNode.setProperty(Property.General.NAME, model.getName());
 
-		modelIndex.add(modelNode, Property.General.NAME, model.getName());
+		modelIndex.add(modelNode, Property.General.NAME, IndexText.expandTermsSpecialChars(model.getName()));
 		modelNode.addLabel(NodeLabel.Types.MODEL);
 		modelNode.addLabel(NodeLabel.Types.CELLML_MODEL);
 		
@@ -248,7 +249,7 @@ public class CellMLExtractor extends Extractor{
 			componentNode.addLabel(NodeLabel.Types.CELLML_COMPONENT);
 			
 			componentNode.setProperty(Property.General.NAME, comp.getName());			
-			modelIndex.add(modelNode, Property.CellML.COMPONENT, comp.getName());
+			modelIndex.add(modelNode, Property.CellML.COMPONENT, IndexText.expandTermsSpecialChars(comp.getName()));
 			
 			if (comp.getMetaId()!=null){
 				componentNode.setProperty(Property.General.ID, comp.getMetaId());

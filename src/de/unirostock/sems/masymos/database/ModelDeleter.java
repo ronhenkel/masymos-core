@@ -1,5 +1,6 @@
 package de.unirostock.sems.masymos.database;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,48 +79,78 @@ public class ModelDeleter {
 		return delList;
 	}
 	
-	public static String deleteDocument(String fileId, Long uID){
-		
-		if (StringUtils.isBlank(fileId) || uID == null || uID < 0) return "No parameter can be NULL or empty";
+	public static Map<String, String> deleteDocument(String fileId, Long uID){
+		HashMap<String, String> msg = new HashMap<String, String>();
+		if (StringUtils.isBlank(fileId) || uID == null || uID < 0) {
+			msg.put("Exception", "No parameter can be NULL or empty and uID can not be zero or less");
+			return msg;
+		}
 		Node doc = DocumentTraverser.getDocumentByUID(uID);
-		if (doc==null) return "No document with UID " + uID.toString();
+		if (doc==null) {
+			msg.put("document not found", "No document with UID " + uID.toString());
+			return msg;
+		}
 		try (Transaction tx = graphDB.beginTx()){
-			if (StringUtils.equals((String) doc.getProperty(Property.General.FILEID, ""), fileId)) return "fileId does not match";
+			if (StringUtils.equals((String) doc.getProperty(Property.General.FILEID, ""), fileId)) {
+				msg.put("fileId not found", "fileId " + fileId + " does not match for uID " + uID.toString() );
+				return msg;
+			}
 			tx.success();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return e.getMessage();
+			msg.put("Error" , e.getMessage());
+			return msg;
 		}				
 		return doDelete(uID);
 	}
 	
-	public static String deleteDocument(String fileId, String versionId, Long uID){
-		
-		if (StringUtils.isBlank(fileId) || StringUtils.isBlank(versionId) || uID == null || uID < 0) return "No parameter can be NULL or empty";
+	
+	public static Map<String, String> deleteDocument(String fileId, String versionId, Long uID){
+		HashMap<String, String> msg = new HashMap<String, String>();
+		if (StringUtils.isBlank(fileId) || StringUtils.isBlank(versionId) || uID == null || uID < 0) {
+			msg.put("Exception", "No parameter can be NULL or empty and uID can not be zero or less");
+			return msg;
+		}
 		Node doc = DocumentTraverser.getDocumentByUID(uID);
-		if (doc==null) return "No document with UID " + uID.toString();
+		if (doc==null) {
+			msg.put("document not found", "No document with UID " + uID.toString());
+			return msg;
+		}
 		
 		try (Transaction tx = graphDB.beginTx()){
-			if (StringUtils.equals((String) doc.getProperty(Property.General.FILEID, ""), fileId)) return "fileId does not match";
-			if (StringUtils.equals((String) doc.getProperty(Property.General.VERSIONID, ""), versionId)) return "versionId does not match";
+			if (StringUtils.equals((String) doc.getProperty(Property.General.FILEID, ""), fileId)) {
+				msg.put("fileId not found", "fileId " + fileId + " does not match for uID " + uID.toString() );
+				return msg;
+			}
+			if (StringUtils.equals((String) doc.getProperty(Property.General.VERSIONID, ""), versionId)) {
+				msg.put("versionId not found", "versionId " + versionId + " does not match for uID " + uID.toString() + "and fileId " + fileId );
+				return msg;
+			}
 			tx.success();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return e.getMessage();
+			msg.put("Error" , e.getMessage());
+			return msg;
 		}
 		return doDelete(uID);		
 	}
 
-	public static String deleteDocument(Long uID){
-		if (uID==null || uID < 0) return "UID can not be NULL or negative!";
+	public static Map<String, String> deleteDocument(Long uID){
+		HashMap<String, String> msg = new HashMap<String, String>();
+		if (uID==null || uID < 0) {
+			msg.put("Exception", "UID can not be NULL or negative!");
+			return msg;
+		}
 		
 		Node doc = DocumentTraverser.getDocumentByUID(uID);
-		if (doc==null) return "No document with UID " + uID.toString();
-
+		if (doc==null) {
+			msg.put("document not found", "No document with UID " + uID.toString());
+			return msg;
+		}
 		return doDelete(uID);
 	}	
 		
-	private static String doDelete(Long uID){	
+	private static Map<String, String> doDelete(Long uID){	
 		List<Node> nodesToBeDeleted = getNodesToBeDeleted(uID);
 		List<Relationship> relToBeDeleted = getRelationshipsToBeDeleted(uID);
 		Long relCount = 0L;
@@ -209,12 +240,18 @@ public class ModelDeleter {
 			tx.success();
 		} catch (Exception e){
 			e.printStackTrace();
-			return e.getMessage();
+			Map<String, String> msg = new HashMap<String, String>();
+			msg.put("Exception", e.getMessage());
+			return msg;
 		}
 		
+		Map<String, String> msg = new HashMap<String, String>();
+		msg.put("successful", Boolean.TRUE.toString());
+		msg.put("uID", uID.toString());
+		msg.put("nodes deleted", nodeCount.toString());
+		msg.put("relations deleted", relCount.toString());
 		
-		
-		return "Document# " + uID + " deleted. " + nodeCount + " nodes and " + relCount + " relations removed.";
+		return msg; 
 	}
 
 	//returns false if node should not be deleted, otherwise it deletes relations and returns true
