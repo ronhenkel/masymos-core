@@ -7,12 +7,17 @@ import java.net.URL;
 import java.util.concurrent.Callable;
 
 import org.neo4j.graphdb.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import de.binfalse.bflog.LOGGER;
 import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.extractor.Extractor;
 
 
 public class SEDMLExtractorThread  implements Callable<Node> {
+	
+	final  Logger logger = LoggerFactory.getLogger(SEDMLExtractorThread.class);
 
 	private String filePath;
 	private String versionID;
@@ -47,7 +52,7 @@ public class SEDMLExtractorThread  implements Callable<Node> {
 	            is.close();
 	             
 	        } catch (Exception e) {
-	            e.printStackTrace();
+	           logger.error(e.getMessage());
 	        }   
 	    Node documentNode = SEDMLExtractor.extractStoreIndexSEDML(sb.toString(),versionID, uID);
 	    Extractor.setDocumentUID(documentNode, uID);

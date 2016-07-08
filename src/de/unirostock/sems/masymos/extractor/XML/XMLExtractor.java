@@ -7,11 +7,14 @@ import javax.xml.stream.XMLStreamException;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.extractor.Extractor;
 
 public class XMLExtractor extends Extractor{
 
+	final static Logger logger = LoggerFactory.getLogger(XMLExtractor.class);
 	
 	public static Node extractStoreIndex(InputStream stream, String versionID) throws XMLStreamException, IOException{
 		
@@ -21,9 +24,8 @@ public class XMLExtractor extends Extractor{
 			tx.success();
 		} catch (XMLStreamException e) {
 			documentNode = null;
-			//TODO Log me
-			System.out.println("Error XMLStreamException while parsing model");
-			System.out.println(e.getMessage());
+			logger.error("Error XMLStreamException while parsing model");
+			logger.error(e.getMessage());
 		}
 		return documentNode;
 	}

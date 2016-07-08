@@ -29,6 +29,8 @@ import org.jlibsedml.XMLException;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
@@ -41,6 +43,7 @@ import de.unirostock.sems.masymos.extractor.Extractor;
 
 public class SEDMLExtractor extends Extractor{
 	
+	final static Logger logger = LoggerFactory.getLogger(SEDMLExtractor.class);
 	
 
 	public static Node extractStoreIndexSEDML(File sedFile, String versionID, Long uID) throws XMLStreamException, IOException{
@@ -52,9 +55,8 @@ public class SEDMLExtractor extends Extractor{
                  tx.success();
          } catch (XMLStreamException e) {
                  documentNode = null;
-                 //TODO Log me
-                 System.out.println("Error XMLStreamException while parsing model");
-                 System.out.println(e.getMessage());
+                 logger.error("Error XMLStreamException while parsing model");
+                 logger.error(e.getMessage());
          }
          return documentNode;
  }
@@ -68,9 +70,8 @@ public class SEDMLExtractor extends Extractor{
                  tx.success();
          } catch (XMLStreamException e) {
                  documentNode = null;
-                 //TODO Log me
-                 System.out.println("Error XMLStreamException while parsing model");
-                 System.out.println(e.getMessage());
+                 logger.error("Error XMLStreamException while parsing model");
+                 logger.error(e.getMessage());
          }
          return documentNode;
  }	
@@ -82,8 +83,7 @@ public class SEDMLExtractor extends Extractor{
 		try {
 			doc = Libsedml.readDocumentFromString(sedFile);
 		} catch (XMLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		//create SEDML document
 		Node documentNode = IdFactory.instance().addToNodeDeleteIndex(graphDB.createNode(), uID);

@@ -9,12 +9,17 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 
 public class ModelResultSetWriter {
+	
+	final static Logger logger = LoggerFactory.getLogger(ModelResultSetWriter.class);
 	
 	public static void writeModelResults(List<ModelResultSet> mrs, List<IQueryInterface> qL, String path){
 		
@@ -27,7 +32,7 @@ public class ModelResultSetWriter {
 		try {
 			writeOut(result, gson.toJson(mrs));
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		
 		StringBuilder sb = new StringBuilder();
@@ -40,7 +45,7 @@ public class ModelResultSetWriter {
 		try {
 			writeOut(query, sb.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 	}
 	
@@ -56,7 +61,7 @@ public class ModelResultSetWriter {
 			bw = new BufferedWriter(fw);
 			bw.write(content);
 			bw.close();
-			//System.out.println("Done");
+			
 		} catch(IOException e){
             throw e;						
 		}		

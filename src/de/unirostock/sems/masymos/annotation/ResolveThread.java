@@ -1,11 +1,15 @@
 package de.unirostock.sems.masymos.annotation;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.ebi.miriam.lib.MiriamLink;
 
 
 public class ResolveThread extends Thread {
+	
+	final Logger logger = LoggerFactory.getLogger(ResolveThread.class);
 
 	private String uri;
 	private long number;
@@ -21,32 +25,32 @@ public class ResolveThread extends Thread {
 		String[] res = {};
 		String originalURI = uri;
 		try {
-			MiriamLink link = new MiriamLink();
-			link.setAddress("http://www.ebi.ac.uk/miriamws/main/MiriamWebServices");
+			MiriamLink link = AnnotationResolverUtil.instance().getMiriamLink();
+			
 			if (StringUtils.startsWith(uri, "http")) {
 				uri = link.convertURL(uri);
-				System.out.println("Identifier.org URL " + originalURI + " mapped to Miriam URN " + uri);
+				logger.info("Miriam request #" + number + " Identifier.org URL " + originalURI + " mapped to Miriam URN " + uri);
 			}
 			if (StringUtils.isBlank(uri)) {
 				uri = link.getMiriamURI(originalURI);
-				System.out.println("Retrieving equivalent for invalid " + originalURI +" --> " + uri);
+				logger.warn("Miriam request #" + number + " Retrieving equivalent for invalid " + originalURI +" --> " + uri);
 			}
 			res = link.getLocations(uri); 
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			logger.error(e1.getMessage());
 		}
 		if ((res == null) || (res.length == 0)) {
-			System.out.println("Miriam request #" + number +" returned no results for " + uri);
+			logger.info("Miriam request #" + number +" returned no results for " + uri);
 			return;
 		}
-		System.out.println("Miriam request #" + number +" returned " + res.length + " results for " + uri);
+		logger.info("Miriam request #" + number +" returned " + res.length + " results for " + uri);
 		
 		for (int i = 0; i < res.length; i++) {
 			//TODO this oldURI is a hack until Identifiers.org provides a proper interface
 			AnnotationResolverUtil.instance().addToUrlThreadPool(originalURI, res[i]);
 		}
 		
-		System.out.println("Miriam request #" + number +" finished");
+		logger.info("Miriam request #" + number +" finished");
 
 	}
 

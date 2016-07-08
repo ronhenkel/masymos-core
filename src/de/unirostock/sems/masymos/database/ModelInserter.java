@@ -11,6 +11,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.annotation.AnnotationResolverUtil;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
@@ -19,6 +21,8 @@ import de.unirostock.sems.masymos.configuration.Relation;
 import de.unirostock.sems.masymos.extractor.Extractor;
 
 public class ModelInserter {
+	
+	final static Logger logger = LoggerFactory.getLogger(ModelInserter.class);
 
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 
@@ -31,7 +35,7 @@ public class ModelInserter {
 		try {
 			documentNode = Extractor.extractStoreIndex(XMLdoc, modelType, versionId, uID);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			documentNode = null;
 		}
 		
@@ -52,7 +56,7 @@ public class ModelInserter {
 			
 			tx.success();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 			
 		
@@ -72,6 +76,7 @@ public class ModelInserter {
 						documentNode.createRelationshipTo(predNode, Relation.DatabaseRelTypes.HAS_PREDECESSOR);
 						tx.success();
 					} catch (Exception e) {
+						logger.error(e.getMessage());
 						// TODO: handle exception
 					}
 				}
@@ -90,7 +95,7 @@ public class ModelInserter {
 		try {
 			documentNode = Extractor.extractStoreIndex(url, modelType, uID);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			documentNode = null;
 		}
 		
@@ -109,7 +114,7 @@ public class ModelInserter {
 			
 			tx.success();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			return Long.MIN_VALUE;
 		}
 		

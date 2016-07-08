@@ -21,14 +21,18 @@ import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasonerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.util.OntologyFactory;
 
 public class Ontology {
 	
+	final static Logger logger = LoggerFactory.getLogger(Ontology.class);
+	
 	public static void extractOntology(File file, String ontologyName){
-
+		
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology o;
 		try {
@@ -36,11 +40,9 @@ public class Ontology {
 			o = manager.loadOntologyFromOntologyDocument( new ByteArrayInputStream(FileUtils.readFileToByteArray(file)));
 			if (o!=null) importOntology(o,ontologyName);
 		} catch (OWLOntologyCreationException e) {
-
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		} catch (Exception e) {
-
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		} 
 
 
@@ -55,7 +57,7 @@ public class Ontology {
 		OWLReasoner reasoner = reasonerFactory.createReasoner(ontology);
 
 		if (!reasoner.isConsistent()) {
-			// logger.error("Ontology is inconsistent");
+			//logger.error("Ontology is inconsistent");
 			// throw your exception of choice here
 			throw new Exception("Ontology is inconsistent");
 		}
@@ -69,12 +71,12 @@ public class Ontology {
 		
 		long counter = 0;
 		long classSize = ontology.getClassesInSignature().size();
-		System.out.println("The ontology contains " + ontology.getLogicalAxiomCount() 
+		logger.info("The ontology contains " + ontology.getLogicalAxiomCount() 
 				+ " axioms, "+ classSize + " classes, and "
 				+ ontology.getObjectPropertiesInSignature().size()+ " properties");
-		System.out.print("Processed:  " + ++counter);
+		logger.info("Processed:  " + ++counter);
 		for (OWLClass c : ontology.getClassesInSignature()) {//ontology.getClassesInSignature(true)
-			if ((counter % 50) == 0)System.out.println("..." + counter + " of " + classSize);
+			if ((counter % 50) == 0)logger.info("..." + counter + " of " + classSize);
 			counter++;
 
 			try (Transaction tx = Manager.instance().getDatabase().beginTx()) {
@@ -165,7 +167,7 @@ public class Ontology {
 			}
 
 		}
-		System.out.println("...done");
+		logger.info("...done");
 	}
 
 	public static Node getOrCreateNodeWithUniqueFactory(String idValue, String ontologyName)

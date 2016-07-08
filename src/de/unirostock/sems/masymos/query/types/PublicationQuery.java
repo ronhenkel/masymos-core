@@ -14,6 +14,8 @@ import org.apache.lucene.search.Query;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
@@ -27,6 +29,8 @@ import de.unirostock.sems.masymos.query.results.ModelResultSet;
 import de.unirostock.sems.masymos.query.results.PublicationResultSet;
 
 public class PublicationQuery implements IQueryInterface {
+	
+	final static Logger logger = LoggerFactory.getLogger(PersonQuery.class);
 
 	private final Analyzer analyzer = AnalyzerHandler.getPublicationindexanalyzer();
 	private final Index<Node> index = Manager.instance().getPublicationIndex();
@@ -57,7 +61,7 @@ public class PublicationQuery implements IQueryInterface {
 		try {
 			q = createQueryFromQueryMap();
 		} catch (ParseException e) {
-			//TODO log me
+			logger.error(e.getMessage());
 			q = null;
 		}
 		return q;
@@ -118,6 +122,7 @@ public class PublicationQuery implements IQueryInterface {
 					//try to parse term
 					qp.parse(term);
 				} catch (ParseException e) {
+					logger.debug("Queryparser unable to parse term " + term + ", trying to escape characters");
 					//if it fails, escape term
 					term = QueryParser.escape(term);
 				}
@@ -201,7 +206,7 @@ public class PublicationQuery implements IQueryInterface {
 		try {
 			q = createQueryFromQueryMap();
 		} catch (ParseException e) {
-			// TODO log me
+			logger.error(e.getMessage());
 			return null;
 		}
 		

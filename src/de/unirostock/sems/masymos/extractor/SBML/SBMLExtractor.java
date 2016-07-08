@@ -16,6 +16,8 @@ import org.neo4j.graphdb.Transaction;
 import org.sbml.jsbml.Annotation;
 import org.sbml.jsbml.CVTerm;
 import org.sbml.jsbml.CVTerm.Qualifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.Creator;
 import org.sbml.jsbml.Event;
@@ -47,6 +49,8 @@ import de.unirostock.sems.masymos.util.IndexText;
 
 
 public class SBMLExtractor extends Extractor{
+
+	final static Logger logger = LoggerFactory.getLogger(SBMLExtractor.class);
 	
 	private static SBMLReader reader = new SBMLReader();
 
@@ -58,9 +62,8 @@ public class SBMLExtractor extends Extractor{
 			tx.success();
 		} catch (XMLStreamException e) {
 			documentNode = null;
-			//TODO Log me
-			System.out.println("Error XMLStreamException while parsing model");
-			System.out.println(e.getMessage());
+			logger.error("Error XMLStreamException while parsing model");
+			logger.error(e.getMessage());
 		} 
 		return documentNode;
 	}
@@ -135,7 +138,7 @@ public class SBMLExtractor extends Extractor{
 //				annotationNode.setProperty(Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
 //				annotationIndex.add(annotationNode, Property.General.NONRDF, annotation.getNonRDFannotation().toXMLString());
 //			} catch (XMLStreamException e) {
-//				System.out.println(e.getMessage());
+//				logger.error(e.getMessage());
 //			}
 //			
 //		}

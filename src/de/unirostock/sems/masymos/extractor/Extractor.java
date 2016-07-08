@@ -37,6 +37,7 @@ import de.unirostock.sems.masymos.query.types.PersonQuery;
 import de.unirostock.sems.masymos.query.types.PublicationQuery;
 
 public abstract class Extractor {
+	
 	protected static Index<Node> publicationIndex = Manager.instance().getPublicationIndex();
 	protected static Index<Node> personIndex = Manager.instance().getPersonIndex();
 	protected static Index<Node> modelIndex = Manager.instance().getModelIndex();	

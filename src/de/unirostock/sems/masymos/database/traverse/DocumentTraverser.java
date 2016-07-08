@@ -10,6 +10,8 @@ import org.neo4j.graphdb.MultipleFoundException;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
@@ -17,6 +19,7 @@ import de.unirostock.sems.masymos.database.Manager;
 
 public class DocumentTraverser {
 
+	final static Logger logger = LoggerFactory.getLogger(DocumentTraverser.class);
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 
 	public static Node getDocumentByUID(Long uID) {
@@ -25,6 +28,7 @@ public class DocumentTraverser {
 			node = graphDB.findNode(NodeLabel.Types.DOCUMENT, Property.General.UID, uID);
 			tx.success();
 		} catch (MultipleFoundException e) {
+			logger.error(e.getMessage());
 			return null;
 		}
 		return node;
@@ -48,6 +52,7 @@ public class DocumentTraverser {
 			node =graphDB.findNode(NodeLabel.Types.RESOURCE, Property.General.URI, uri);
 			tx.success();
 		} catch (MultipleFoundException e) {
+			logger.error(e.getMessage());
 			return null;
 		}
 		return node;

@@ -16,6 +16,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.index.lucene.ValueContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
@@ -23,6 +25,8 @@ import de.unirostock.sems.masymos.configuration.Relation;
 import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
 
 public class ModelDeleter {
+	
+	final static Logger logger = LoggerFactory.getLogger(ModelDeleter.class);
 	
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 	private static Index<Node> nodeDeleteIndex = Manager.instance().getNodeDeleteIndex();
@@ -46,7 +50,7 @@ public class ModelDeleter {
 			}			
 			tx.success();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			delList.clear();
 			return delList;
 		}
@@ -71,7 +75,7 @@ public class ModelDeleter {
 			}			
 			tx.success();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			delList.clear();
 			return delList;
 		}
@@ -97,7 +101,7 @@ public class ModelDeleter {
 			}
 			tx.success();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			msg.put("Error" , e.getMessage());
 			return msg;
 		}				
@@ -128,7 +132,7 @@ public class ModelDeleter {
 			}
 			tx.success();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			msg.put("Error" , e.getMessage());
 			return msg;
 		}
@@ -239,7 +243,7 @@ public class ModelDeleter {
 			
 			tx.success();
 		} catch (Exception e){
-			e.printStackTrace();
+			logger.error(e.getMessage());
 			Map<String, String> msg = new HashMap<String, String>();
 			msg.put("Exception", e.getMessage());
 			return msg;
@@ -369,7 +373,7 @@ public class ModelDeleter {
 				}
 			}
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(e.getMessage());
 				return false;
 			}
 		}
