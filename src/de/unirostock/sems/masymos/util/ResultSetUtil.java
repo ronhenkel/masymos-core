@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 
@@ -20,10 +20,10 @@ public class ResultSetUtil {
 	 * @author Ron Henkel
 	 *
 	 */
-	private static class ModelResultSetScoreComperator implements Comparator<ModelResultSet>{
+	private static class ModelResultSetScoreComperator implements Comparator<VersionResultSet>{
 
 		@Override
-		public int compare(ModelResultSet rs1, ModelResultSet rs2) {
+		public int compare(VersionResultSet rs1, VersionResultSet rs2) {
 			if ((rs1==null) || (rs2==null)) return 0; 
 			
 			if (rs1.getScore() < rs2.getScore())  return 1;
@@ -49,7 +49,7 @@ public class ResultSetUtil {
 		
 	}
 
-	public static List<ModelResultSet> sortModelResultSetByScore(List<ModelResultSet> rsList){
+	public static List<VersionResultSet> sortModelResultSetByScore(List<VersionResultSet> rsList){
 
 		Collections.sort(rsList, new ModelResultSetScoreComperator());
 		return rsList;
@@ -77,19 +77,19 @@ public class ResultSetUtil {
 //		return sortByDatabaseId(new LinkedList<IResultSetInterface>(toBeKept.values()));
 //	}
 
-	public static List<ModelResultSet> collateModelResultSetByModelId(List<ModelResultSet> rsList){
-		Map<String, ModelResultSet> toBeKept = new HashMap<String, ModelResultSet>();
+	public static List<VersionResultSet> collateModelResultSetByModelId(List<VersionResultSet> rsList){
+		Map<String, VersionResultSet> toBeKept = new HashMap<String, VersionResultSet>();
 		Map<String, Integer> freq = new HashMap<String, Integer>();		
 		int count; 
-		for (Iterator<ModelResultSet> rsListIt = rsList.iterator(); rsListIt.hasNext();) {
-			ModelResultSet resultSet = (ModelResultSet) rsListIt.next();
+		for (Iterator<VersionResultSet> rsListIt = rsList.iterator(); rsListIt.hasNext();) {
+			VersionResultSet resultSet = (VersionResultSet) rsListIt.next();
 			if (toBeKept.keySet().contains(resultSet.getModelId())){
 				//count occurrences of a model
 				count = freq.containsKey(resultSet.getModelId()) ? freq.get(resultSet.getModelId()) : 0;
 				freq.put(resultSet.getModelId(), count + 1);
 				
 				//sum up scores
-				ModelResultSet toBeKeptResultSet = toBeKept.get(resultSet.getModelId());
+				VersionResultSet toBeKeptResultSet = toBeKept.get(resultSet.getModelId());
 				float score = toBeKeptResultSet.getScore() + resultSet.getScore();
 				toBeKeptResultSet.setScore(score);
 				
@@ -110,11 +110,11 @@ public class ResultSetUtil {
 			int c = countIt.next();
 			if (c > maxCount) maxCount = c;
 		}
-		for (Iterator<ModelResultSet> iterator = toBeKept.values().iterator(); iterator.hasNext();) {
-			ModelResultSet modelResultSet = (ModelResultSet) iterator.next();
+		for (Iterator<VersionResultSet> iterator = toBeKept.values().iterator(); iterator.hasNext();) {
+			VersionResultSet modelResultSet = (VersionResultSet) iterator.next();
 			modelResultSet.setScore(modelResultSet.getScore()/maxCount);			
 		}
-		return sortModelResultSetByScore(new LinkedList<ModelResultSet>(toBeKept.values()));
+		return sortModelResultSetByScore(new LinkedList<VersionResultSet>(toBeKept.values()));
 	}
 
 

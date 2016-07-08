@@ -3,22 +3,22 @@ package de.unirostock.sems.masymos.util;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 public class RankAggregationUtil {
 	
-	public static List<List<ModelResultSet>> splitModelResultSetByIndex(List<ModelResultSet> toBeSplit){
+	public static List<List<VersionResultSet>> splitModelResultSetByIndex(List<VersionResultSet> toBeSplit){
 		
-		List<List<ModelResultSet>> rankersList = new LinkedList<List<ModelResultSet>> ();
+		List<List<VersionResultSet>> rankersList = new LinkedList<List<VersionResultSet>> ();
 		
-		List<ModelResultSet> modelRanker = new LinkedList<ModelResultSet>();
-		List<ModelResultSet> annotationRanker = new LinkedList<ModelResultSet>();
-		List<ModelResultSet> personRanker = new LinkedList<ModelResultSet>();
-		List<ModelResultSet> publicationRanker = new LinkedList<ModelResultSet>();
+		List<VersionResultSet> modelRanker = new LinkedList<VersionResultSet>();
+		List<VersionResultSet> annotationRanker = new LinkedList<VersionResultSet>();
+		List<VersionResultSet> personRanker = new LinkedList<VersionResultSet>();
+		List<VersionResultSet> publicationRanker = new LinkedList<VersionResultSet>();
 		
 		
-		for(ModelResultSet e : toBeSplit){
-			ModelResultSet model = new ModelResultSet(e.getScore(), e.getModelId(), e.getModelId(), e.getIndexSource());
+		for(VersionResultSet e : toBeSplit){
+			VersionResultSet model = new VersionResultSet(e.getScore(), e.getModelId(), e.getModelId(), e.getIndexSource());
 			if (e.getIndexSource().equals("ModelIndex"))
 				modelRanker.add(model);
 			if (e.getIndexSource().equals("AnnotationIndex"))

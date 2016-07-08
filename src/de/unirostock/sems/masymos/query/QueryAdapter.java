@@ -9,7 +9,7 @@ import org.neo4j.graphdb.Transaction;
 
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.results.AnnotationResultSet;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.PersonResultSet;
 import de.unirostock.sems.masymos.query.results.PublicationResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
@@ -24,8 +24,8 @@ public class QueryAdapter {
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();
 
 	
-	public static List<ModelResultSet> executeSingleQueryForModels(IQueryInterface iq){
-		List<ModelResultSet> mrs = new LinkedList<ModelResultSet>();
+	public static List<VersionResultSet> executeSingleQueryForModels(IQueryInterface iq){
+		List<VersionResultSet> mrs = new LinkedList<VersionResultSet>();
 		try (Transaction tx = graphDB.beginTx())
 		{
 			mrs = iq.getModelResults();
@@ -71,8 +71,8 @@ public class QueryAdapter {
 		
 	}
 	
-	public static List<ModelResultSet> executeMultipleQueriesForModels(List<IQueryInterface> iqList){
-		List<ModelResultSet> rs = new LinkedList<ModelResultSet>();
+	public static List<VersionResultSet> executeMultipleQueriesForModels(List<IQueryInterface> iqList){
+		List<VersionResultSet> rs = new LinkedList<VersionResultSet>();
 		for (Iterator<IQueryInterface> iqIt = iqList.iterator(); iqIt.hasNext();) {
 			IQueryInterface interfaceQuery = (IQueryInterface) iqIt.next();	
 			try (Transaction tx = graphDB.beginTx())
@@ -96,8 +96,8 @@ public class QueryAdapter {
 		
 	}
 	
-	public static List<ModelResultSet> executeSedmlQueryForModels(SedmlQuery sedq){
-		List<ModelResultSet> mrs = new LinkedList<ModelResultSet>();
+	public static List<VersionResultSet> executeSedmlQueryForModels(SedmlQuery sedq){
+		List<VersionResultSet> mrs = new LinkedList<VersionResultSet>();
 		try (Transaction tx = graphDB.beginTx())
 		{
 			mrs = sedq.getModelResults();

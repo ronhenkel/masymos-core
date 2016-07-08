@@ -24,7 +24,7 @@ import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.AnnotationFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.AnnotationResultSet;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 public class AnnotationQuery implements IQueryInterface {
 	private final Analyzer analyzer = AnalyzerHandler.getAnnotationindexanalyzer();
@@ -89,7 +89,7 @@ public class AnnotationQuery implements IQueryInterface {
 	}
 	
 	@Override
-	public List<ModelResultSet> getModelResults() {
+	public List<VersionResultSet> getModelResults() {
 		return retrieveModelResultsByAnnotation();
 	}
 	
@@ -153,14 +153,14 @@ public class AnnotationQuery implements IQueryInterface {
 		return qp.parse(q.toString());		
 	}
 	
-	private List<ModelResultSet> retrieveModelResultsByAnnotation(){
+	private List<VersionResultSet> retrieveModelResultsByAnnotation(){
 
 		IndexHits<Node> hits = retrieveHits();
 		
 		if ((hits == null) || (hits.size() == 0)) {
-			return new LinkedList<ModelResultSet>();
+			return new LinkedList<VersionResultSet>();
 		}
-		List<ModelResultSet> resultList = new LinkedList<ModelResultSet>();
+		List<VersionResultSet> resultList = new LinkedList<VersionResultSet>();
 		
 		int resultCount = 1;
 		for (Iterator<Node> hitsIt = hits.iterator(); hitsIt.hasNext();) {

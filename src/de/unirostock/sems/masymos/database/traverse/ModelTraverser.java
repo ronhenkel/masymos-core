@@ -20,7 +20,7 @@ import de.unirostock.sems.masymos.configuration.Relation.AnnotationRelTypes;
 import de.unirostock.sems.masymos.configuration.Relation.DatabaseRelTypes;
 import de.unirostock.sems.masymos.configuration.Relation.DocumentRelTypes;
 import de.unirostock.sems.masymos.database.Manager;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 public class ModelTraverser {
 
@@ -93,8 +93,8 @@ public class ModelTraverser {
 	}
 
 	
-	public static List<ModelResultSet> getModelResultSetFromNode(Node node, float score, String indexSource) {
-		List<ModelResultSet> result = new LinkedList<ModelResultSet>();
+	public static List<VersionResultSet> getModelResultSetFromNode(Node node, float score, String indexSource) {
+		List<VersionResultSet> result = new LinkedList<VersionResultSet>();
 		List<Node> modelList = getModelsFromNode(node);
 		for (Iterator<Node> iterator = modelList.iterator(); iterator.hasNext();) {
 			Node modelNode = (Node) iterator.next();
@@ -116,7 +116,7 @@ public class ModelTraverser {
 				// skip this one
 				continue;
 				
-			ModelResultSet rs = new ModelResultSet(score, modelId, modelName, indexSource);
+			VersionResultSet rs = new VersionResultSet(score, modelId, modelName, indexSource);
 			if (docNode.hasProperty(Property.General.VERSIONID)) rs.setVersionID((String)docNode.getProperty(Property.General.VERSIONID));
 			if (docNode.hasProperty(Property.General.URI)) rs.setDocumentURI((String)docNode.getProperty(Property.General.URI));
 			if (docNode.hasProperty(Property.General.FILENAME)) rs.setFilename((String)docNode.getProperty(Property.General.FILENAME));

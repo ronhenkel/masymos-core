@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 /**
  * A class for the basic operations on rankers. 
@@ -16,7 +16,7 @@ public class RankerHandler {
 	/**
 	 * Maps the model Ids to the model objects.
 	 */
-	private LinkedHashMap<String, ModelResultSet> rankerMap = new LinkedHashMap<String, ModelResultSet>();
+	private LinkedHashMap<String, VersionResultSet> rankerMap = new LinkedHashMap<String, VersionResultSet>();
 	/**
 	 * Maps the model Ids onto the ranking of the model.
 	 */
@@ -30,12 +30,12 @@ public class RankerHandler {
 	 * Constructor.
 	 * @param rankerList A list of models.
 	 */
-	public RankerHandler(List<ModelResultSet> rankerList){
+	public RankerHandler(List<VersionResultSet> rankerList){
 		int count = 1;
 		
 		if(rankerList != null)
-			for(ModelResultSet model: rankerList){
-				ModelResultSet newModel = model.copyModelResultSet();
+			for(VersionResultSet model: rankerList){
+				VersionResultSet newModel = model.copyModelResultSet();
 				rankerMap.put(model.getModelID(), newModel);
 				modelIDRankingMap.put(model.getModelID(), count);
 				modelIDList.add(model.getModelID());
@@ -110,7 +110,7 @@ public class RankerHandler {
 	 */
 	public void updateScoreByModelID(String modelID, float newScore){
 		if(this.rankerMap.containsKey(modelID)){
-			ModelResultSet model = this.rankerMap.get(modelID);
+			VersionResultSet model = this.rankerMap.get(modelID);
 			model.setScore(newScore);
 			this.rankerMap.put(modelID, model);
 		}
@@ -154,10 +154,10 @@ public class RankerHandler {
 	 * 
 	 * @return A list of sorted models.
 	 */
-	public List<ModelResultSet> makeResultsList(){
-		List<ModelResultSet> modelsList = new LinkedList<ModelResultSet>();
+	public List<VersionResultSet> makeResultsList(){
+		List<VersionResultSet> modelsList = new LinkedList<VersionResultSet>();
 		for(String modelID: modelIDList){
-			ModelResultSet model = this.rankerMap.get(modelID);
+			VersionResultSet model = this.rankerMap.get(modelID);
 			modelsList.add(model);
 		}
 		return modelsList;
@@ -167,7 +167,7 @@ public class RankerHandler {
 	 * Sets all scores to -1 when score are not relevant. For not score-based aggregation methods.
 	 */
 	public void setScoresToNAN(){
-		for(ModelResultSet model: this.rankerMap.values())
+		for(VersionResultSet model: this.rankerMap.values())
 			model.setScore(-1);
 		
 	}

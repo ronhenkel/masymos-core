@@ -12,11 +12,11 @@ import java.util.List;
 import com.google.gson.Gson;
 
 import de.unirostock.sems.masymos.query.IQueryInterface;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 public class ModelResultSetWriter {
 	
-	public static void writeModelResults(List<ModelResultSet> mrs, List<IQueryInterface> qL, String path){
+	public static void writeModelResults(List<VersionResultSet> mrs, List<IQueryInterface> qL, String path){
 		
 		String timeLog = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS").format(Calendar.getInstance().getTime());
 	    File query = new File(path + timeLog + ".query");

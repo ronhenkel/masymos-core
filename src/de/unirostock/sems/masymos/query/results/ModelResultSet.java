@@ -1,22 +1,33 @@
 package de.unirostock.sems.masymos.query.results;
 
+import java.util.Collections;
+import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
 
-import de.unirostock.sems.masymos.query.IDocumentResultSetInterface;
 
-public class ModelResultSet implements IDocumentResultSetInterface {
+public class ModelResultSet {
 	private String modelName;
 	private float score;
 	private String modelID;
 	private String explanation;
-	private String versionID;
 	private String documentURI;
 	private String xmldoc;
 	private String filename;
 	private String fileId;
 	private String indexSource;
+	private LinkedList<VersionResultSet> versions = new LinkedList<VersionResultSet>();
 	
+
+	public LinkedList<VersionResultSet> getVersions() {
+		return versions;
+	}
+
+
+	public void setVersions(LinkedList<VersionResultSet> versions) {
+		this.versions = versions;
+	}
+
 
 	public String getIndexSource() {
 		return indexSource;
@@ -42,22 +53,19 @@ public class ModelResultSet implements IDocumentResultSetInterface {
 		return modelID;
 	}
 
-
-	public String getVersionID() {
-		return versionID;
-	}
 	
 	public ModelResultSet copyModelResultSet(){
 		ModelResultSet newSet = new ModelResultSet();
 		newSet.modelName = this.getModelName();
 		newSet.score = this.getScore();
 		newSet.modelID = this.getModelID();
-		newSet.versionID = this.getVersionId();
 		newSet.documentURI = this.getDocumentURI();
 		newSet.xmldoc = this.getXmldoc();
 		newSet.filename = this.getFilename();
 		newSet.fileId = this.getFileId();
 		newSet.indexSource = this.getIndexSource();
+		LinkedList<VersionResultSet> newVersions = new LinkedList<VersionResultSet>();
+		Collections.copy(newVersions, this.versions);
 		
 		return newSet;
 	}
@@ -67,15 +75,15 @@ public class ModelResultSet implements IDocumentResultSetInterface {
 	}
 
 
-	public ModelResultSet(float score, String modelId, String modelName, String versionID, String documentURI, String filename, String explanation, String indexSource){
+	public ModelResultSet(float score, String modelId, String modelName, LinkedList<VersionResultSet> versions, String documentURI, String filename, String explanation, String indexSource){
 		this.modelName = modelName;
 		this.score = score;
 		this.modelID = modelId;
 		this.explanation = explanation;
-		this.versionID = versionID;
 		this.documentURI = documentURI;
 		this.filename = filename;
 		this.indexSource = indexSource;
+		this.versions = versions;
 	}
 	
 	
@@ -93,7 +101,11 @@ public class ModelResultSet implements IDocumentResultSetInterface {
 		this.documentURI = documentURI;
 		this.filename = filename;
 		this.indexSource = indexSource;
-	}	
+	}
+	
+	public void addVersion(VersionResultSet newVersion){
+		this.versions.add(newVersion);
+	}
 	
 	public String getModelName() {
 		return modelName;
@@ -103,22 +115,14 @@ public class ModelResultSet implements IDocumentResultSetInterface {
 		return modelID;
 	}
 
-	@Override
+	
 	public float getScore() {
 		return score;
 	}
 
-	@Override
+	
 	public String getSearchExplanation() {
 		return explanation;
-	}
-
-	public String getVersionId() {
-		return versionID;
-	}
-	
-	public void setVersionID(String versionID) {
-		this.versionID = versionID;
 	}
 	
 	
@@ -171,11 +175,10 @@ public class ModelResultSet implements IDocumentResultSetInterface {
 		
 		if (this.score != rs.score) return false;
 		
-		if (!StringUtils.equals(this.versionID, rs.getVersionId())) return false;
+		if (!this.versions.equals(rs.getVersions())) return false;
 		
 		return true;
 	}
-
 
 
 }

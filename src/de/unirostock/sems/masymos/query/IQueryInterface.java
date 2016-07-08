@@ -7,7 +7,7 @@ import org.apache.lucene.search.Query;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 
 public interface IQueryInterface {
@@ -22,6 +22,6 @@ public interface IQueryInterface {
 	
 	public Query getQuery();
 	
-	public List<ModelResultSet> getModelResults();
+	public List<VersionResultSet> getModelResults();
 
 }

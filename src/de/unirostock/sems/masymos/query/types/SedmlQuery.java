@@ -22,7 +22,7 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.traverse.SedmlTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.SedmlFieldEnumerator;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 public class SedmlQuery implements IQueryInterface {
@@ -151,9 +151,9 @@ public class SedmlQuery implements IQueryInterface {
 	}
 
 	@Override
-	public List<ModelResultSet> getModelResults() {
+	public List<VersionResultSet> getModelResults() {
 		// TODO Models connected to Sedmls
-		return new LinkedList<ModelResultSet>();
+		return new LinkedList<VersionResultSet>();
 	}
 
 }

@@ -22,7 +22,7 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.SBMLModelFieldEnumerator;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 public class SBMLModelQuery implements IQueryInterface {
 	private final Analyzer analyzer = AnalyzerHandler.getModelindexanalyzer();
@@ -72,7 +72,7 @@ public class SBMLModelQuery implements IQueryInterface {
 //	}
 	
 	@Override
-	public List<ModelResultSet> getModelResults() {
+	public List<VersionResultSet> getModelResults() {
 		return retrieveModelResults();
 	}
 
@@ -137,23 +137,23 @@ public class SBMLModelQuery implements IQueryInterface {
 		return qp.parse(q.toString());		
 	}
 	
-	private List<ModelResultSet> retrieveModelResults(){
-		if (queryMap.isEmpty()) return new LinkedList<ModelResultSet>();
+	private List<VersionResultSet> retrieveModelResults(){
+		if (queryMap.isEmpty()) return new LinkedList<VersionResultSet>();
 		
 		Query q = null;
 		try {
 			q = createQueryFromQueryMap();
 		} catch (ParseException e) {
 			// TODO log me
-			return new LinkedList<ModelResultSet>();
+			return new LinkedList<VersionResultSet>();
 		}
 		
 		IndexHits<Node> hits = index.query(q);
 
 		if ((hits == null) || (hits.size() == 0)) {
-			return new LinkedList<ModelResultSet>();
+			return new LinkedList<VersionResultSet>();
 		}
-		List<ModelResultSet> result = new LinkedList<ModelResultSet>();
+		List<VersionResultSet> result = new LinkedList<VersionResultSet>();
 
 		for (Iterator<Node> hitsIt = hits.iterator(); hitsIt.hasNext();) {		
 			Node node = (Node) hitsIt.next();

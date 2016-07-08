@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.unirostock.sems.masymos.configuration.RankAggregationType;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.util.RankerHandler;
 import de.unirostock.sems.masymos.util.ResultSetUtil;
 
@@ -26,13 +26,13 @@ public class RankAggregation {
 	 * @param rankersWeights
 	 * @return Aggregate list of models
 	 */
-	public static List<ModelResultSet> aggregate(List<List<ModelResultSet>> rankersList, List<ModelResultSet> initialAggregateRanker, RankAggregationType.Types aggregateMethod, int rankersWeights){
+	public static List<VersionResultSet> aggregate(List<List<VersionResultSet>> rankersList, List<VersionResultSet> initialAggregateRanker, RankAggregationType.Types aggregateMethod, int rankersWeights){
 
 		if (initialAggregateRanker.isEmpty()) return initialAggregateRanker;
 		//Build the ranker handlers
 		RankerHandler aggregateRankerH = new RankerHandler(initialAggregateRanker);
 		List<RankerHandler> rankersListH = new LinkedList<RankerHandler>();
-		for(List<ModelResultSet> ranker: rankersList){
+		for(List<VersionResultSet> ranker: rankersList){
 			RankerHandler rankerH = new RankerHandler(ranker);
 			rankersListH.add(rankerH);
 		}
@@ -250,7 +250,7 @@ public class RankAggregation {
 	//Swaps every two adjacent models in the initial aggregate ranker.
 	//If the average distance between the aggregate ranker after swapping and the other rankers is improved
 	//Permanently swap. Swap back otherwise.
-	private static List<ModelResultSet> adj (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){ //adjacent pairs, based on Ke-tau
+	private static List<VersionResultSet> adj (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){ //adjacent pairs, based on Ke-tau
 		double dintanceMin = 0; //The minimal average distance so far
 		int count = 0; //Counts the rounds of swapping every two adjacent models in the initial ranker
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
@@ -291,7 +291,7 @@ public class RankAggregation {
 		
 		//Set scores to -1. Scores are not relevant. 
 		aggregateRankerH.setScoresToNAN();
-		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		List<VersionResultSet> results = aggregateRankerH.makeResultsList(); 
 		return results;
 	}
 	
@@ -307,7 +307,7 @@ public class RankAggregation {
 	//CombMNZ method. Based on the normalized Borda rank. 
 	//The new score for each model will be:
 	//(the sum of Borda rank normalization related to each ranker) * (the number of the rankers the model is contained in) 
-	private static List<ModelResultSet> combMNZ(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
+	private static List<VersionResultSet> combMNZ(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
 		int s = rankersListH.size();
 		float maxPossibleScore = s * s;  //The maximum value the score could ever have
 		
@@ -331,7 +331,7 @@ public class RankAggregation {
 		}
 		
 		//Make a list with the models
-		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		List<VersionResultSet> results = aggregateRankerH.makeResultsList(); 
 		ResultSetUtil.sortModelResultSetByScore(results); //Sort the models by score
 		return results;
 	}
@@ -346,7 +346,7 @@ public class RankAggregation {
 	 * @return An aggregate list of models.
 	 */
 	//Local Kemenization. Builds a locally Kemeny optimized aggregate ranker.
-	private static List<ModelResultSet> localKemenization(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
+	private static List<VersionResultSet> localKemenization(List<RankerHandler>rankersListH, RankerHandler aggregateRankerH){
 		int rankersListLength = rankersListH.size();
 		int aggregateRankerLength = aggregateRankerH.getRankerSize();
 		ArrayList<String> modelIDList = aggregateRankerH.getModelIDList();
@@ -390,7 +390,7 @@ public class RankAggregation {
 		
 		//Set scores to -1. Scores are not relevant. 
 		aggregateRankerH.setScoresToNAN();
-		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		List<VersionResultSet> results = aggregateRankerH.makeResultsList(); 
 		return results;
 	}
 	
@@ -405,7 +405,7 @@ public class RankAggregation {
 	 * @return An aggregate list of models.
 	 */
 	//Builds a locally Kemeny optimized aggregate ranker with regard to the weights of the input rankers.
-	private static List<ModelResultSet> supervisedLocalKemenization (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH, HashMap<Integer, Integer> weights){
+	private static List<VersionResultSet> supervisedLocalKemenization (List<RankerHandler>rankersListH, RankerHandler aggregateRankerH, HashMap<Integer, Integer> weights){
 		
 		int numberOfRankers = rankersListH.size();
 		int aggregateRankerLength = aggregateRankerH.getRankerSize();
@@ -466,7 +466,7 @@ public class RankAggregation {
 		
 		//Set scores to -1. Scores are not relevant. 
 		aggregateRankerH.setScoresToNAN();
-		List<ModelResultSet> results = aggregateRankerH.makeResultsList(); 
+		List<VersionResultSet> results = aggregateRankerH.makeResultsList(); 
 		return results;
 	}
 	

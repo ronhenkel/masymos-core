@@ -22,7 +22,7 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.traverse.ModelTraverser;
 import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.PersonFieldEnumerator;
-import de.unirostock.sems.masymos.query.results.ModelResultSet;
+import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.PersonResultSet;
 
 public class PersonQuery implements IQueryInterface{
@@ -69,7 +69,7 @@ public class PersonQuery implements IQueryInterface{
 	}
 	
 	@Override
-	public List<ModelResultSet> getModelResults() {
+	public List<VersionResultSet> getModelResults() {
 		return retrieveModelResultsByPerson();
 	}
 
@@ -134,14 +134,14 @@ public class PersonQuery implements IQueryInterface{
 		return qp.parse(q.toString());		
 	}
 	
-	private List<ModelResultSet> retrieveModelResultsByPerson(){
+	private List<VersionResultSet> retrieveModelResultsByPerson(){
 
 		IndexHits<Node> hits = retrieveHits();
 
 		if ((hits == null) || (hits.size() == 0)) {
-			return new LinkedList<ModelResultSet>();
+			return new LinkedList<VersionResultSet>();
 		}
-		List<ModelResultSet> result = new LinkedList<ModelResultSet>();
+		List<VersionResultSet> result = new LinkedList<VersionResultSet>();
 
 		for (Iterator<Node> hitsIt = hits.iterator(); hitsIt.hasNext();) {		
 			Node node = (Node) hitsIt.next();
