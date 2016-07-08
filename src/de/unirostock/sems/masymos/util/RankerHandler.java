@@ -7,12 +7,29 @@ import java.util.List;
 
 import de.unirostock.sems.masymos.query.results.ModelResultSet;
 
+/**
+ * A class for the basic operations on rankers. 
+ * @author Mariam Nassar
+ *
+ */
 public class RankerHandler {
+	/**
+	 * Maps the model Ids to the model objects.
+	 */
 	private LinkedHashMap<String, ModelResultSet> rankerMap = new LinkedHashMap<String, ModelResultSet>();
+	/**
+	 * Maps the model Ids onto the ranking of the model.
+	 */
 	private LinkedHashMap<String, Integer> modelIDRankingMap = new LinkedHashMap<String, Integer>();
+	/**
+	 * A list with of the sorted model Ids.
+	 */
 	private ArrayList<String> modelIDList = new ArrayList<String>();
 	
-	
+	/**
+	 * Constructor.
+	 * @param rankerList A list of models.
+	 */
 	public RankerHandler(List<ModelResultSet> rankerList){
 		int count = 1;
 		
@@ -26,17 +43,29 @@ public class RankerHandler {
 			}
 	}
 	
-	
+	/**
+	 * 
+	 * @return A sorted list of models.
+	 */
 	public ArrayList<String> getModelIDList(){
 		return this.modelIDList;
 	}
 	
-	
-	public int getLength(){
+	/**
+	 * 
+	 * @return The number of models in the ranker.
+	 */
+	public int getRankerSize(){
 		return this.modelIDList.size();
 	}
 	
-
+	/**
+	 * Search for the ranking of a model by model Id.
+	 * 
+	 * @param modelID
+	 * @return The ranking of the model with the given model Id if the ranker contains the model
+	 * and -1 otherwise.
+	 */
 	//returns the ranking of 'model' in 'ranker' if 'ranker' contains 'modelID' and -1 otherwise
 	public int getRankingByModelID(String modelID){
 		
@@ -45,7 +74,12 @@ public class RankerHandler {
 		else return -1;
 	}
 	
-	
+	/**
+	 * Tests if the ranker contains the model by model Id.
+	 * 
+	 * @param modelID
+	 * @return true, if the ranker contains the model, and false else.
+	 */
 	public boolean containsByModelID(String modelID){ 
 		if(modelIDRankingMap.containsKey(modelID))
 			return true;
@@ -53,7 +87,13 @@ public class RankerHandler {
 			return false;
 	}
 	
-	
+	/**
+	 * Searches for the score of a model by model Id.
+	 * 
+	 * @param modelID
+	 * @return the score of the model with the given model Id if the ranker contains the model. 
+	 * And -1 otherwise.
+	 */
 	public float getScoreByModelID(String modelID){
 		
 		if(this.rankerMap.containsKey(modelID))
@@ -62,7 +102,12 @@ public class RankerHandler {
 			return -1;
 	}
 	
-	
+	/**
+	 * Updates the score of a model by model Id.
+	 * 
+	 * @param modelID
+	 * @param newScore
+	 */
 	public void updateScoreByModelID(String modelID, float newScore){
 		if(this.rankerMap.containsKey(modelID)){
 			ModelResultSet model = this.rankerMap.get(modelID);
@@ -71,7 +116,12 @@ public class RankerHandler {
 		}
 	}
 	
-	
+	/**
+	 * Swaps two models in the ranker by model Ids.
+	 * 
+	 * @param modelID1
+	 * @param modelID2
+	 */
 	public void swap(String modelID1, String modelID2){ 
 		int rankingOfModel1 = this.modelIDRankingMap.get(modelID1);
 		int rankingOfModel2 = this.modelIDRankingMap.get(modelID2);
@@ -100,7 +150,10 @@ public class RankerHandler {
 		return diff;
 	}*/
 	
-	
+	/**
+	 * 
+	 * @return A list of sorted models.
+	 */
 	public List<ModelResultSet> makeResultsList(){
 		List<ModelResultSet> modelsList = new LinkedList<ModelResultSet>();
 		for(String modelID: modelIDList){
@@ -110,7 +163,9 @@ public class RankerHandler {
 		return modelsList;
 	}
 	
-	
+	/**
+	 * Sets all scores to -1 when score are not relevant. For not score-based aggregation methods.
+	 */
 	public void setScoresToNAN(){
 		for(ModelResultSet model: this.rankerMap.values())
 			model.setScore(-1);
