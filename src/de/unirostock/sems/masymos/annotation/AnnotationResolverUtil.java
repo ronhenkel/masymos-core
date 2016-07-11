@@ -10,18 +10,24 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.configuration.NodeLabel;
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
+import uk.ac.ebi.miriam.lib.MiriamLink;
 
 public class AnnotationResolverUtil {
+	final Logger logger = LoggerFactory.getLogger(AnnotationResolverUtil.class);
 	
 	private static AnnotationResolverUtil INSTANCE = null;
 	
 	private volatile Boolean indexLocked = false;
 	
+	private MiriamLink link = null;
+
 	private AtomicLong urlCount= null;
 	private ExecutorService urlThreadPool = Executors.newFixedThreadPool(10);
 	private ExecutorService uriThreadPool = Executors.newFixedThreadPool(5);
@@ -36,6 +42,12 @@ public class AnnotationResolverUtil {
 	private AnnotationResolverUtil(){
 		Manager.instance().getDatabase();
 		urlCount= new AtomicLong(0);
+		link = new MiriamLink();
+		link.setAddress("http://www.ebi.ac.uk/miriamws/main/MiriamWebServices");
+	}
+	
+	public MiriamLink getMiriamLink() {
+		return link;
 	}
  
 	private class WaitThreat extends Thread{
@@ -68,7 +80,7 @@ public class AnnotationResolverUtil {
 			AnnotationResolverUtil.instance().setIndexLocked(true);
 		}
 		
-		System.out.println("Creating URI list from DB...");
+		logger.info("Creating URI list from DB...");
 	
 		long uriCounter = 0;	
 		String uri = "";
@@ -96,7 +108,7 @@ public class AnnotationResolverUtil {
 				uriThreadPool.execute(rt);										
 			}
 			
-			System.out.println("Started to resolve " + uriCounter + " URIs...");		
+			logger.info("Started to resolve " + uriCounter + " URIs...");		
 	
 			uriThreadPool.shutdown();
 			// Wait until all threads are finish
@@ -109,9 +121,9 @@ public class AnnotationResolverUtil {
 			//TODO implement logging!
 			//TODO really, implement logging for this!!!
 			
-			System.out.println("done!");		
+			logger.info("done!");		
 			
-			System.out.println("Started to retrieve " + urlCount + " URLs...");
+			logger.info("Started to retrieve " + urlCount + " URLs...");
 					
 	
 			urlThreadPool.shutdown();
@@ -121,9 +133,9 @@ public class AnnotationResolverUtil {
 			}
 	
 		urlThreadPool = Executors.newFixedThreadPool(10);
-		System.out.println("done!");
+		logger.info("done!");
 		
-		System.out.println("Annotation Index created.");
+		logger.info("Annotation Index created.");
 		AnnotationResolverUtil.instance().setIndexLocked(false);
 	}
 	

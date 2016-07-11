@@ -18,6 +18,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
@@ -25,6 +27,8 @@ import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
 import de.unirostock.sems.masymos.util.IndexText;
 
 public class FetchThread extends Thread {
+	
+	final Logger logger = LoggerFactory.getLogger(FetchThread.class);
 
 	private String url;
 	private String uri;
@@ -64,11 +68,11 @@ public class FetchThread extends Thread {
 			Document doc = Jsoup.parse(text);
 			text = doc.text();
 		} catch (MalformedURLException mue) {
-			System.out.println("Thread #" + number + ": Malformed URL: " + url);
+			logger.info("Thread #" + number + ": Malformed URL: " + url);
 			// do nothing
 		} catch (IOException ioe) {
 			// do nothing
-			System.out.println("Thread #" + number
+			logger.info("Thread #" + number
 					+ ": I/O error or timeout when reading URL: " + url);
 		} finally {
 			IOUtils.closeQuietly(stream);
@@ -79,7 +83,7 @@ public class FetchThread extends Thread {
 		try {
 			text = IndexText.shrinkTextToLuceneTermLength(text);
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			logger.error(e1.getMessage());
 			return;
 		}
 
@@ -90,7 +94,7 @@ public class FetchThread extends Thread {
 				resource = DocumentTraverser.findSingleResourceNodeByURI(uri);
 				if (resource==null) throw new NoSuchElementException("URI is not in the index nor in the database");
 				annoFull.add(resource, Property.General.URI, uri);
-				System.out.println("Thread #" + number + ": No node found in index, added " + uri);
+				logger.warn("Thread #" + number + ": No node found in index, added " + uri);
 			}
 		
 			annoFull.add(resource, Property.General.RESOURCETEXT, text);
@@ -99,12 +103,12 @@ public class FetchThread extends Thread {
 			tx.success();
 			
 		} catch (NoSuchElementException e) {
-			System.err.println("Thread #" + number + ": Thread " + url
-					+ " FAILED - multiple entries with same URI!");
-			System.out.println(e.getMessage());
+			logger.error("Thread #" + number + ": Thread " + url
+					+ " FAILED - multiple entries with same URI: " + uri);
+			logger.error(e.getMessage());
 		} finally {
 		
-			System.out.println("Thread #" + number + ": " + url
+			logger.info("Thread #" + number + ": " + url
 					+ " terminated at " + dateFormat.format(new Date()));
 		}
 	}

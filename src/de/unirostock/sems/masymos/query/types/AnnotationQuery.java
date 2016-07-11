@@ -15,6 +15,8 @@ import org.apache.lucene.search.Query;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
@@ -27,6 +29,9 @@ import de.unirostock.sems.masymos.query.results.AnnotationResultSet;
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 public class AnnotationQuery implements IQueryInterface {
+	
+	final Logger logger = LoggerFactory.getLogger(AnnotationQuery.class);
+	
 	private final Analyzer analyzer = AnalyzerHandler.getAnnotationindexanalyzer();
 	private final Index<Node> index = Manager.instance().getAnnotationIndex();
 	private final String[] indexedFields = {	Property.General.URI, 
@@ -77,7 +82,7 @@ public class AnnotationQuery implements IQueryInterface {
 		try {
 			q = createQueryFromQueryMap();
 		} catch (ParseException e) {
-			//TODO log me
+			logger.error(e.getMessage());
 			q = null;
 		}
 		return q;
@@ -139,6 +144,7 @@ public class AnnotationQuery implements IQueryInterface {
 					//try to parse term
 					qp.parse(term);
 				} catch (ParseException e) {
+					logger.debug("Queryparser could not process " + term + ", trying to escape characters.");
 					//if it fails, escape term
 					term = QueryParser.escape(term);
 				}				
@@ -212,7 +218,7 @@ public class AnnotationQuery implements IQueryInterface {
 		try {
 			q = createQueryFromQueryMap();
 		} catch (ParseException e) {
-			// TODO log me
+			logger.error(e.getMessage());
 			return null;
 		}
 		

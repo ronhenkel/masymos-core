@@ -8,12 +8,15 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Notification;
 import org.neo4j.graphdb.Result;
 import org.neo4j.helpers.collection.Iterators;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
 
 
 public class StructureQuery {
+	final static Logger logger = LoggerFactory.getLogger(StructureQuery.class);
 	
 	public static void runCypherQuery(String cquery){
 		

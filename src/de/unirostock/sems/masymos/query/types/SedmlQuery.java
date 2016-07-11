@@ -14,6 +14,8 @@ import org.apache.lucene.search.Query;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.analyzer.AnalyzerHandler;
 import de.unirostock.sems.masymos.configuration.NodeLabel;
@@ -26,6 +28,8 @@ import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 public class SedmlQuery implements IQueryInterface {
+	
+	final static Logger logger = LoggerFactory.getLogger(SedmlQuery.class);
 	
 	private final Analyzer analyzer = AnalyzerHandler.getSedmlindexanalyzer();
 	private final Index<Node> index = Manager.instance().getSedmlIndex();
@@ -57,7 +61,7 @@ public class SedmlQuery implements IQueryInterface {
 		try {
 			q = createQueryFromQueryMap();
 		} catch (ParseException e) {
-			//TODO log me
+			logger.error(e.getMessage());
 			q = null;
 		}
 		return q;
@@ -130,7 +134,7 @@ public class SedmlQuery implements IQueryInterface {
 		try {
 			q = createQueryFromQueryMap();
 		} catch (ParseException e) {
-			// TODO log me
+			logger.error(e.getMessage());
 			return new LinkedList<SedmlResultSet>();
 		}
 		

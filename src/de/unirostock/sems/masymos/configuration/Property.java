@@ -10,6 +10,8 @@ public class Property {
 		public final static  String CELLML = "CELLML";
 		public final static  String XML = "XML";
 		public final static  String SEDML = "SEDML";
+		public final static  String BIOPAX = "BIOPAX";
+		
 	
 	}
 	
@@ -126,10 +128,15 @@ public class Property {
 			public final static  String SIM_TYPE = "SIMTYPE";
 			public final static  String MATH = "MATH";
 			public final static  String TARGET = "TARGET";
-
-
-
 			
+	}
+	
+	public class BioPax{
+	/*
+	 * Properties to store SBML in DB
+	 */	
+		public final static  String LEVEL = "LEVEL";
+		public final static  String RDFID = "RDFID";
 	}
 	
 	public class GroupCalc{

@@ -19,6 +19,8 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
@@ -45,6 +47,8 @@ import de.unirostock.sems.masymos.util.IndexText;
 
 public class CellMLExtractor extends Extractor{
 	
+	final static Logger logger = LoggerFactory.getLogger(CellMLExtractor.class);
+	
 	public static Node extractStoreIndexCellML(String filePath, String versionID, Long uID) throws XMLStreamException, IOException{
 		Node documentNode = null;
 		
@@ -53,7 +57,7 @@ public class CellMLExtractor extends Extractor{
 			documentNode = extractFromCellML(url, versionID, uID);
 			tx.success();
 		} catch (Throwable e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		//in case no node was generated, generate an empty one
 		if (documentNode==null) {
@@ -79,7 +83,7 @@ public class CellMLExtractor extends Extractor{
 
 		// is that document valid?
 		if (!validator.validate(url))		   
-		   System.err.println (validator.getError());
+		   logger.error(validator.getError().getMessage());
 
 		// get the document
 		CellMLDocument doc = validator.getDocument();
@@ -155,7 +159,7 @@ public class CellMLExtractor extends Extractor{
 					lastName = pubAuthor.get(0);
 					firstName = pubAuthor.get(1);
 				} catch (IndexOutOfBoundsException e) {
-				
+					logger.error(e.getMessage());
 				}
 				if (StringUtils.isEmpty(lastName)) continue;
 				authorList.add(new PersonWrapper(firstName, lastName, null, null));
@@ -209,7 +213,8 @@ public class CellMLExtractor extends Extractor{
 							r.setProperty(Property.CellML.ISPRIVATECONNECTION, true);
 							IdFactory.instance().addToRelationshipDeleteIndex(r, uID);
 						} catch (NullPointerException e) {
-							// nothing
+							logger.warn("Nullpointer when connecting CellML components via interface. uID: " + uID.toString());
+							logger.warn(e.getMessage());
 						}
 						
 					}										
@@ -327,8 +332,12 @@ public class CellMLExtractor extends Extractor{
 			stream = connection.getInputStream(); 
 			text = IOUtils.toString(stream);
 		} catch (MalformedURLException e) {
+			logger.warn("Unable to resovle URL for CMeta:" + linkToModel.toString() + "/@@cmeta");
+			logger.warn(e.getMessage());
 			return null;
 		} catch (IOException e) {
+			logger.warn("Unable to access CMeta resource at: " + linkToModel.toString() + "/@@cmeta");
+			logger.warn(e.getMessage());
 			return null;
 		}
 
@@ -338,6 +347,7 @@ public class CellMLExtractor extends Extractor{
 		try {
 			cmeta = gson.fromJson(text, CmetaContainer.class);
 		} catch (Exception e) {
+			logger.error(e.getMessage());
 			cmeta = null;
 		}		
 		return cmeta;	
