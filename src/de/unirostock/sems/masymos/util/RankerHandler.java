@@ -14,122 +14,121 @@ import de.unirostock.sems.masymos.query.results.VersionResultSet;
  */
 public class RankerHandler {
 	/**
-	 * Maps the model Ids to the model objects.
+	 * Maps the unique version Ids to the version objects.
 	 */
 	private LinkedHashMap<String, VersionResultSet> rankerMap = new LinkedHashMap<String, VersionResultSet>();
 	/**
-	 * Maps the model Ids onto the ranking of the model.
+	 * Maps the unique version Ids onto the ranking of the version.
 	 */
-	private LinkedHashMap<String, Integer> modelIDRankingMap = new LinkedHashMap<String, Integer>();
+	private LinkedHashMap<String, Integer> uniqueVerionIdRanking = new LinkedHashMap<String, Integer>();
 	/**
-	 * A list with of the sorted model Ids.
+	 * A list with of the sorted unique version Ids.
 	 */
-	private ArrayList<String> modelIDList = new ArrayList<String>();
+	private ArrayList<String> uniqueVersionIDList = new ArrayList<String>();
 	
 	/**
 	 * Constructor.
-	 * @param rankerList A list of models.
+	 * @param rankerList A list of versions.
 	 */
 	public RankerHandler(List<VersionResultSet> rankerList){
 		int count = 1;
 		
 		if(rankerList != null)
-			for(VersionResultSet model: rankerList){
-				VersionResultSet newModel = model.copyModelResultSet();
-				rankerMap.put(model.getModelID(), newModel);
-				modelIDRankingMap.put(model.getModelID(), count);
-				modelIDList.add(model.getModelID());
+			for(VersionResultSet version: rankerList){
+				VersionResultSet newVersion = version.copyVersionResultSet();
+				rankerMap.put(version.getUniqueVersionId(), newVersion);
+				uniqueVerionIdRanking.put(version.getUniqueVersionId(), count);
+				uniqueVersionIDList.add(version.getUniqueVersionId());
 				count++;
 			}
 	}
 	
 	/**
 	 * 
-	 * @return A sorted list of models.
+	 * @return A sorted list of versions.
 	 */
-	public ArrayList<String> getModelIDList(){
-		return this.modelIDList;
+	public ArrayList<String> getUniqueVersionIDList(){
+		return this.uniqueVersionIDList;
 	}
 	
 	/**
 	 * 
-	 * @return The number of models in the ranker.
+	 * @return The number of versions in the ranker.
 	 */
 	public int getRankerSize(){
-		return this.modelIDList.size();
+		return this.uniqueVersionIDList.size();
 	}
 	
 	/**
-	 * Search for the ranking of a model by model Id.
+	 * Search for the ranking of a version by uniqueVersionId.
 	 * 
-	 * @param modelID
-	 * @return The ranking of the model with the given model Id if the ranker contains the model
+	 * @param uniqueVersionID
+	 * @return The ranking of the version with the given uniqueVersionID if the ranker contains the version
 	 * and -1 otherwise.
 	 */
-	//returns the ranking of 'model' in 'ranker' if 'ranker' contains 'modelID' and -1 otherwise
-	public int getRankingByModelID(String modelID){
+	public int getRankingByUniqueVersionID(String uniqueVersionID){
 		
-		if(modelIDRankingMap.containsKey(modelID))
-			return modelIDRankingMap.get(modelID);
+		if(uniqueVerionIdRanking.containsKey(uniqueVersionID))
+			return uniqueVerionIdRanking.get(uniqueVersionID);
 		else return -1;
 	}
 	
 	/**
-	 * Tests if the ranker contains the model by model Id.
+	 * Tests if the ranker contains the version by uniqueVersionId.
 	 * 
-	 * @param modelID
-	 * @return true, if the ranker contains the model, and false else.
+	 * @param uniqueVersionId
+	 * @return true, if the ranker contains the version, and false else.
 	 */
-	public boolean containsByModelID(String modelID){ 
-		if(modelIDRankingMap.containsKey(modelID))
+	public boolean containsByUniqueVersionID(String uniqueVersionId){ 
+		if(uniqueVerionIdRanking.containsKey(uniqueVersionId))
 			return true;
 		else
 			return false;
 	}
 	
 	/**
-	 * Searches for the score of a model by model Id.
+	 * Searches for the score of a version by uniqueVersionId.
 	 * 
 	 * @param modelID
-	 * @return the score of the model with the given model Id if the ranker contains the model. 
+	 * @return the score of the version with the given uniqueVersionId if the ranker contains the version. 
 	 * And -1 otherwise.
 	 */
-	public float getScoreByModelID(String modelID){
+	public float getScoreByUniqueVersionID(String uniqueVersionId){
 		
-		if(this.rankerMap.containsKey(modelID))
-			return this.rankerMap.get(modelID).getScore();
+		if(this.rankerMap.containsKey(uniqueVersionId))
+			return this.rankerMap.get(uniqueVersionId).getScore();
 		else 
 			return -1;
 	}
 	
 	/**
-	 * Updates the score of a model by model Id.
+	 * Updates the score of a version by uniqueVersionId.
 	 * 
-	 * @param modelID
+	 * @param uniqueVersionId
 	 * @param newScore
 	 */
-	public void updateScoreByModelID(String modelID, float newScore){
-		if(this.rankerMap.containsKey(modelID)){
-			VersionResultSet model = this.rankerMap.get(modelID);
-			model.setScore(newScore);
-			this.rankerMap.put(modelID, model);
+	public void updateScoreByModelID(String uniqueVersionId, float newScore){
+		if(this.rankerMap.containsKey(uniqueVersionId)){
+			VersionResultSet version = this.rankerMap.get(uniqueVersionId);
+			version.setScore(newScore);
+			this.rankerMap.put(uniqueVersionId, version);
 		}
 	}
 	
 	/**
-	 * Swaps two models in the ranker by model Ids.
+	 * Swaps two versions in the ranker by uniqueVersionIds.
 	 * 
-	 * @param modelID1
-	 * @param modelID2
+	 * @param uniqueVersionId1
+	 * @param uniqueVersionId2
 	 */
-	public void swap(String modelID1, String modelID2){ 
-		int rankingOfModel1 = this.modelIDRankingMap.get(modelID1);
-		int rankingOfModel2 = this.modelIDRankingMap.get(modelID2);
+	public void swap(String uniqueVersionId1, String uniqueVersionId2){ 
+		int rankingOfModel1 = this.uniqueVerionIdRanking.get(uniqueVersionId1);
+		int rankingOfModel2 = this.uniqueVerionIdRanking.get(uniqueVersionId2);
 	
-		this.modelIDRankingMap.put(modelID1, rankingOfModel2);
-		this.modelIDRankingMap.put(modelID2, rankingOfModel1);
-		this.modelIDList.set(rankingOfModel1 - 1, modelID2);
-		this.modelIDList.set(rankingOfModel2 - 1, modelID1);
+		this.uniqueVerionIdRanking.put(uniqueVersionId1, rankingOfModel2);
+		this.uniqueVerionIdRanking.put(uniqueVersionId2, rankingOfModel1);
+		this.uniqueVersionIDList.set(rankingOfModel1 - 1, uniqueVersionId2);
+		this.uniqueVersionIDList.set(rankingOfModel2 - 1, uniqueVersionId1);
 	}
 	
 	
@@ -152,23 +151,23 @@ public class RankerHandler {
 	
 	/**
 	 * 
-	 * @return A list of sorted models.
+	 * @return A list of sorted versions.
 	 */
 	public List<VersionResultSet> makeResultsList(){
-		List<VersionResultSet> modelsList = new LinkedList<VersionResultSet>();
-		for(String modelID: modelIDList){
-			VersionResultSet model = this.rankerMap.get(modelID);
-			modelsList.add(model);
+		List<VersionResultSet> verionsList = new LinkedList<VersionResultSet>();
+		for(String uniqueVersionId: uniqueVersionIDList){
+			VersionResultSet version = this.rankerMap.get(uniqueVersionId);
+			verionsList.add(version);
 		}
-		return modelsList;
+		return verionsList;
 	}
 	
 	/**
 	 * Sets all scores to -1 when score are not relevant. For not score-based aggregation methods.
 	 */
 	public void setScoresToNAN(){
-		for(VersionResultSet model: this.rankerMap.values())
-			model.setScore(-1);
+		for(VersionResultSet version: this.rankerMap.values())
+			version.setScore(-1);
 		
 	}
 

@@ -19,6 +19,13 @@ public class VersionResultSet implements IDocumentResultSetInterface {
 	private String fileId;
 	private String indexSource;
 	
+	public String getUniqueVersionId(){
+		StringBuilder uniqueIdBuilder = new StringBuilder();
+		uniqueIdBuilder.append(this.getFileId());
+		uniqueIdBuilder.append(this.getVersionId());
+		String uniqueId = uniqueIdBuilder.toString();
+		return uniqueId;
+	}
 
 	public String getIndexSource() {
 		return indexSource;
@@ -49,7 +56,7 @@ public class VersionResultSet implements IDocumentResultSetInterface {
 		return versionID;
 	}
 	
-	public VersionResultSet copyModelResultSet(){
+	public VersionResultSet copyVersionResultSet(){
 		VersionResultSet newSet = new VersionResultSet();
 		newSet.modelName = this.getModelName();
 		newSet.score = this.getScore();

@@ -17,16 +17,16 @@ public class RankAggregationUtil {
 		List<VersionResultSet> publicationRanker = new LinkedList<VersionResultSet>();
 		
 		
-		for(VersionResultSet e : toBeSplit){
-			VersionResultSet model = new VersionResultSet(e.getScore(), e.getModelId(), e.getModelId(), e.getIndexSource());
-			if (e.getIndexSource().equals("ModelIndex"))
-				modelRanker.add(model);
-			if (e.getIndexSource().equals("AnnotationIndex"))
-				annotationRanker.add(model);
-			if (e.getIndexSource().equals("PersonIndex"))
-				personRanker.add(model);
-			if (e.getIndexSource().equals("PublicationIndex"))
-				publicationRanker.add(model);
+		for(VersionResultSet version : toBeSplit){
+			VersionResultSet newVersion = version.copyVersionResultSet();
+			if (version.getIndexSource().equals("ModelIndex"))
+				modelRanker.add(newVersion);
+			if (version.getIndexSource().equals("AnnotationIndex"))
+				annotationRanker.add(newVersion);
+			if (version.getIndexSource().equals("PersonIndex"))
+				personRanker.add(newVersion);
+			if (version.getIndexSource().equals("PublicationIndex"))
+				publicationRanker.add(newVersion);
 		}
 		
 		modelRanker = ResultSetUtil.collateModelResultSetByModelId(modelRanker);

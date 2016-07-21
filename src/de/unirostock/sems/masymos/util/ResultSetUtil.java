@@ -77,19 +77,60 @@ public class ResultSetUtil {
 //		return sortByDatabaseId(new LinkedList<IResultSetInterface>(toBeKept.values()));
 //	}
 
+//	public static List<VersionResultSet> collateModelResultSetByModelId(List<VersionResultSet> rsList){
+//		Map<String, VersionResultSet> toBeKept = new HashMap<String, VersionResultSet>();
+//		Map<String, Integer> freq = new HashMap<String, Integer>();		
+//		int count; 
+//		for (Iterator<VersionResultSet> rsListIt = rsList.iterator(); rsListIt.hasNext();) {
+//			VersionResultSet resultSet = (VersionResultSet) rsListIt.next();
+//			if (toBeKept.keySet().contains(resultSet.getModelId())){
+//				//count occurrences of a model
+//				count = freq.containsKey(resultSet.getModelId()) ? freq.get(resultSet.getModelId()) : 0;
+//				freq.put(resultSet.getModelId(), count + 1);
+//				
+//				//sum up scores
+//				VersionResultSet toBeKeptResultSet = toBeKept.get(resultSet.getModelId());
+//				float score = toBeKeptResultSet.getScore() + resultSet.getScore();
+//				toBeKeptResultSet.setScore(score);
+//				
+//				//check if from same index
+//				if (StringUtils.isEmpty(toBeKeptResultSet.getIndexSource()) 
+//					|| !toBeKeptResultSet.getIndexSource().equals(resultSet.getIndexSource())){
+//					toBeKeptResultSet.setIndexSource("n/a");
+//				}				
+//				//store model to list
+//				toBeKept.put(resultSet.getModelId(), toBeKeptResultSet); 
+//			} else {
+//				toBeKept.put(resultSet.getModelId(), resultSet);
+//			}
+//		}
+//		
+//		int maxCount = 1;
+//		for (Iterator<Integer> countIt = freq.values().iterator(); countIt.hasNext();) {
+//			int c = countIt.next();
+//			if (c > maxCount) maxCount = c;
+//		}
+//		for (Iterator<VersionResultSet> iterator = toBeKept.values().iterator(); iterator.hasNext();) {
+//			VersionResultSet modelResultSet = (VersionResultSet) iterator.next();
+//			modelResultSet.setScore(modelResultSet.getScore()/maxCount);			
+//		}
+//		return sortModelResultSetByScore(new LinkedList<VersionResultSet>(toBeKept.values()));
+//	}
+
 	public static List<VersionResultSet> collateModelResultSetByModelId(List<VersionResultSet> rsList){
 		Map<String, VersionResultSet> toBeKept = new HashMap<String, VersionResultSet>();
 		Map<String, Integer> freq = new HashMap<String, Integer>();		
 		int count; 
 		for (Iterator<VersionResultSet> rsListIt = rsList.iterator(); rsListIt.hasNext();) {
 			VersionResultSet resultSet = (VersionResultSet) rsListIt.next();
-			if (toBeKept.keySet().contains(resultSet.getModelId())){
+			String id = resultSet.getUniqueVersionId();
+			if (toBeKept.keySet().contains(id)){
 				//count occurrences of a model
-				count = freq.containsKey(resultSet.getModelId()) ? freq.get(resultSet.getModelId()) : 0;
-				freq.put(resultSet.getModelId(), count + 1);
+				count = freq.containsKey(id) ? freq.get(id) : 0;
+				freq.put(id, count + 1);
 				
 				//sum up scores
-				VersionResultSet toBeKeptResultSet = toBeKept.get(resultSet.getModelId());
+				VersionResultSet toBeKeptResultSet = toBeKept.get(id);
 				float score = toBeKeptResultSet.getScore() + resultSet.getScore();
 				toBeKeptResultSet.setScore(score);
 				
@@ -99,9 +140,9 @@ public class ResultSetUtil {
 					toBeKeptResultSet.setIndexSource("n/a");
 				}				
 				//store model to list
-				toBeKept.put(resultSet.getModelId(), toBeKeptResultSet); 
+				toBeKept.put(id, toBeKeptResultSet); 
 			} else {
-				toBeKept.put(resultSet.getModelId(), resultSet);
+				toBeKept.put(id, resultSet);
 			}
 		}
 		
@@ -116,6 +157,5 @@ public class ResultSetUtil {
 		}
 		return sortModelResultSetByScore(new LinkedList<VersionResultSet>(toBeKept.values()));
 	}
-
 
 }
