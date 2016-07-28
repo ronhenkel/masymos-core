@@ -2,6 +2,7 @@ package de.unirostock.sems.masymos.query.results;
 
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,15 +17,15 @@ public class ModelResultSet {
 	private String filename;
 	private String fileId;
 	private String indexSource;
-	private LinkedList<VersionResultSet> versions = new LinkedList<VersionResultSet>();
+	private List<VersionResultSet> versions = new LinkedList<VersionResultSet>();
 	
 
-	public LinkedList<VersionResultSet> getVersions() {
+	public List<VersionResultSet> getVersions() {
 		return versions;
 	}
 
 
-	public void setVersions(LinkedList<VersionResultSet> versions) {
+	public void setVersions(List<VersionResultSet> versions) {
 		this.versions = versions;
 	}
 
@@ -64,7 +65,7 @@ public class ModelResultSet {
 		newSet.filename = this.getFilename();
 		newSet.fileId = this.getFileId();
 		newSet.indexSource = this.getIndexSource();
-		LinkedList<VersionResultSet> newVersions = new LinkedList<VersionResultSet>();
+		List<VersionResultSet> newVersions = new LinkedList<VersionResultSet>();
 		Collections.copy(newVersions, this.versions);
 		
 		return newSet;
@@ -75,7 +76,7 @@ public class ModelResultSet {
 	}
 
 
-	public ModelResultSet(float score, String modelId, String modelName, LinkedList<VersionResultSet> versions, String documentURI, String filename, String explanation, String indexSource){
+	public ModelResultSet(float score, String modelId, String modelName, List<VersionResultSet> versions, String documentURI, String filename, String explanation, String indexSource){
 		this.modelName = modelName;
 		this.score = score;
 		this.modelID = modelId;
