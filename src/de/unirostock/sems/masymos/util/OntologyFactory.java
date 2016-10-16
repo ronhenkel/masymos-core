@@ -169,7 +169,16 @@ public class OntologyFactory {
 
 		@Override
 		protected void initialize(Node created, Map<String, Object> properties) {
-			created.setProperty( "id", properties.get( "id" ) );
+			if( properties.containsKey("id") )
+				created.setProperty( "id", properties.get( "id" ) );
+			else if( properties.size() == 1 ) {
+				// does not contain id key, but only one key/value pair use the key as id
+				// This appears to happen, when to COMODI term in question is not yet in the database
+				// (This is a really ugly hack and I've got no idea why this is this way, but whatever)
+				created.setProperty( "id", properties.keySet().toArray()[0]);
+				created.setProperty("dynamicaly_created", true);
+			}
+			
 			created.addLabel( Label.label(this.indexName) );
 		}
 		
