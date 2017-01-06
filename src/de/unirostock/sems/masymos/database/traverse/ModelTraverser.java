@@ -22,6 +22,11 @@ import de.unirostock.sems.masymos.configuration.Relation.DocumentRelTypes;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class ModelTraverser {
 
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();

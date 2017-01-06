@@ -17,6 +17,12 @@ import org.sbgn.bindings.Sbgn;
 
 import de.unirostock.sems.masymos.configuration.Relation;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class SBGN2Cypher  {
 	
 	static Set<String> consumptionReaction =  new HashSet<String>(Arrays.asList("consumption"));

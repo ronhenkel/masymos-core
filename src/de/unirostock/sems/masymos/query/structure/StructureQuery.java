@@ -15,6 +15,12 @@ import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.database.Manager;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class StructureQuery {
 	final static Logger logger = LoggerFactory.getLogger(StructureQuery.class);
 	

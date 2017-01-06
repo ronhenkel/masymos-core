@@ -12,6 +12,11 @@ import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class AnalyzerHandler{
 	
 	final static Logger logger = LoggerFactory.getLogger(AnalyzerHandler.class);

@@ -5,6 +5,11 @@ import java.util.List;
 
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
+/**
+*
+* Copyright 2016 Mariam Nassar, Ron Henkel (GPL v3)
+* @author ronhenkel, Mariam Nassar
+*/
 public class RankAggregationUtil {
 	
 	public static List<List<VersionResultSet>> splitModelResultSetByIndex(List<VersionResultSet> toBeSplit){

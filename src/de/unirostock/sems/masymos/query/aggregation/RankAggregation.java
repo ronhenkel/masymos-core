@@ -9,9 +9,10 @@ import de.unirostock.sems.masymos.configuration.RankAggregationType;
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.util.RankerHandler;
 import de.unirostock.sems.masymos.util.ResultSetUtil;
-
 /**
  * This class contains the aggregation methods for the models lists.  
+ * 
+ * Copyright 2016 Mariam Nassar (GPL v3)
  * @author Mariam Nassar
  *
  */

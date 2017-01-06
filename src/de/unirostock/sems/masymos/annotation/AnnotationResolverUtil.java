@@ -19,6 +19,11 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
 import uk.ac.ebi.miriam.lib.MiriamLink;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class AnnotationResolverUtil {
 	final Logger logger = LoggerFactory.getLogger(AnnotationResolverUtil.class);
 	

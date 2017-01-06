@@ -27,6 +27,12 @@ import de.unirostock.sems.masymos.query.enumerator.PersonFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.PersonResultSet;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class PersonQuery implements IQueryInterface{
 	
 	final Logger logger = LoggerFactory.getLogger(PersonQuery.class);

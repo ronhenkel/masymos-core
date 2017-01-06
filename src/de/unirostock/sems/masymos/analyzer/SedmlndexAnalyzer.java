@@ -10,6 +10,11 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import de.unirostock.sems.masymos.configuration.Property;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class SedmlndexAnalyzer extends DelegatingAnalyzerWrapper{
 	
 	private final Analyzer defaultAnalyzer;

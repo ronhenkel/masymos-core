@@ -6,6 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import de.unirostock.sems.masymos.query.IDocumentResultSetInterface;
 
+/**
+*
+* Copyright 2016 Rebekka Alm, Ron Henkel (GPL v3)
+* @author Rebekka Alm, ronhenkel
+*/
+
 
 public class SedmlResultSet implements IDocumentResultSetInterface{
 	

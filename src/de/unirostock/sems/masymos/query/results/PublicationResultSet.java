@@ -7,6 +7,12 @@ import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.data.PublicationWrapper;
 import de.unirostock.sems.masymos.query.IResourceResultSetInterface;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class PublicationResultSet implements IResourceResultSetInterface{
 
 	private float score;

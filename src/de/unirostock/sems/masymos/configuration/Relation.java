@@ -3,6 +3,11 @@ package de.unirostock.sems.masymos.configuration;
 import org.neo4j.graphdb.RelationshipType;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class Relation {
 
 	public static enum SbmlRelTypes implements RelationshipType

@@ -8,6 +8,11 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class NodeTypReturnEvaluater implements Evaluator{
 	private Label nodeType;
 	

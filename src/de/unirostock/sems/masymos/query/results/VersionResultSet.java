@@ -7,6 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import de.unirostock.sems.masymos.query.IDocumentResultSetInterface;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class VersionResultSet implements IDocumentResultSetInterface {
 	private String modelName;
 	private float score;

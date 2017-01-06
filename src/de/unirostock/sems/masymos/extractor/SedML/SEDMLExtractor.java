@@ -40,7 +40,11 @@ import de.unirostock.sems.masymos.configuration.Relation.SedmlRelTypes;
 import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.extractor.Extractor;
 
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class SEDMLExtractor extends Extractor{
 	
 	final static Logger logger = LoggerFactory.getLogger(SEDMLExtractor.class);

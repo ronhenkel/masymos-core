@@ -14,6 +14,12 @@ import de.unirostock.sems.masymos.query.results.VersionResultSet;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class ResultSetUtil {
 	/**
 	 * This comparator orders the models by score descending

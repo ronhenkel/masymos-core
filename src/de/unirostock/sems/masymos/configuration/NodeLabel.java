@@ -2,9 +2,11 @@ package de.unirostock.sems.masymos.configuration;
 
 import org.neo4j.graphdb.Label;
 
-
-
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class NodeLabel {
 
 	public static enum Types implements Label

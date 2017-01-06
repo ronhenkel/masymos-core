@@ -27,6 +27,12 @@ import org.slf4j.LoggerFactory;
 import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.util.OntologyFactory;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* Adapted from https://neo4j.com/blog/using-owl-with-neo4j/ (Stefanie Wiegand)
+* @author ronhenkel
+*/
 public class Ontology {
 	
 	final static Logger logger = LoggerFactory.getLogger(Ontology.class);

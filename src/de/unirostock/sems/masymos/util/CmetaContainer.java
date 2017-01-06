@@ -1,7 +1,11 @@
 package de.unirostock.sems.masymos.util;
 import java.util.List;
 
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class CmetaContainer {
 	
 	public String model_author_org; 

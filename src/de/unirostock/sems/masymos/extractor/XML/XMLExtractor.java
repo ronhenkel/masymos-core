@@ -12,6 +12,13 @@ import org.slf4j.LoggerFactory;
 
 import de.unirostock.sems.masymos.extractor.Extractor;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
+
 public class XMLExtractor extends Extractor{
 
 	final static Logger logger = LoggerFactory.getLogger(XMLExtractor.class);

@@ -26,6 +26,12 @@ import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.SBMLModelFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class SBMLModelQuery implements IQueryInterface {
 	
 	final static Logger logger = LoggerFactory.getLogger(SBMLModelQuery.class);

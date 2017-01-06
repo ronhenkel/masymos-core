@@ -9,6 +9,8 @@ import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
 /**
  * A class for the basic operations on rankers. 
+ * 
+ * Copyright 2016 Mariam Nassar (GPL v3)
  * @author Mariam Nassar
  *
  */

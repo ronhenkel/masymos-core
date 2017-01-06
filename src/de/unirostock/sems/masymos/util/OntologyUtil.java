@@ -15,7 +15,11 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 import de.unirostock.sems.masymos.database.Manager;
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class OntologyUtil {
 	
 	static GraphDatabaseService graphDB =  Manager.instance().getDatabase() ;

@@ -10,9 +10,15 @@ import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.binfalse.bflog.LOGGER;
 import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.extractor.Extractor;
+
+
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 
 
 public class SEDMLExtractorThread  implements Callable<Node> {

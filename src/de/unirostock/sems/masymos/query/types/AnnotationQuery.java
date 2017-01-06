@@ -28,6 +28,12 @@ import de.unirostock.sems.masymos.query.enumerator.AnnotationFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.AnnotationResultSet;
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class AnnotationQuery implements IQueryInterface {
 	
 	final Logger logger = LoggerFactory.getLogger(AnnotationQuery.class);

@@ -6,6 +6,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 
 public class ModelResultSet {
 	private String modelName;

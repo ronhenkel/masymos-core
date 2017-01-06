@@ -11,6 +11,11 @@ import org.neo4j.graphdb.index.UniqueFactory;
 
 import de.unirostock.sems.masymos.database.Manager;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class OntologyFactory {
 
 

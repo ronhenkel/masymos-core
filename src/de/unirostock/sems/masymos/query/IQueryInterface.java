@@ -9,7 +9,11 @@ import org.neo4j.graphdb.index.Index;
 
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public interface IQueryInterface {
 	
 	public Analyzer getAnalyzer();

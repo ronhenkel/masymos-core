@@ -1,6 +1,11 @@
 package de.unirostock.sems.masymos.configuration;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel, Mariam Nassar (GPL v3)
+* @author ronhenkel, Mariam Nassar
+*/
 public class RankAggregationType {
 
 	public static enum Types

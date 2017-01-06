@@ -1,6 +1,12 @@
 package de.unirostock.sems.masymos.util;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class StructureQueryUtil {
 	
 //	public static String[] getConstituentTypes(){

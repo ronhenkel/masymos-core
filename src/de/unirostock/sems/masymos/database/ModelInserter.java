@@ -20,6 +20,11 @@ import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.configuration.Relation;
 import de.unirostock.sems.masymos.extractor.Extractor;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class ModelInserter {
 	
 	final static Logger logger = LoggerFactory.getLogger(ModelInserter.class);

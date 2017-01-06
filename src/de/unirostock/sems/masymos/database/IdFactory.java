@@ -10,6 +10,11 @@ import org.neo4j.index.lucene.ValueContext;
 
 import de.unirostock.sems.masymos.configuration.Property;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class IdFactory {
 
 	private static IdFactory INSTANCE = null;

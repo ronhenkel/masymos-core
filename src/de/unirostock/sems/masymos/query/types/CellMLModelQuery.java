@@ -26,6 +26,12 @@ import de.unirostock.sems.masymos.query.IQueryInterface;
 import de.unirostock.sems.masymos.query.enumerator.CellMLModelFieldEnumerator;
 import de.unirostock.sems.masymos.query.results.VersionResultSet;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class CellMLModelQuery implements IQueryInterface {
 	
 	final Logger logger = LoggerFactory.getLogger(CellMLModelQuery.class);

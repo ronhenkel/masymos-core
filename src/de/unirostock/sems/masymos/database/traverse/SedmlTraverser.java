@@ -18,6 +18,11 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.query.results.SedmlResultSet;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel, Rebekka Alm (GPL v3)
+* @author ronhenkel, Rebekka Alm
+*/
 public class SedmlTraverser {
 	
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();

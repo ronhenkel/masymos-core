@@ -19,6 +19,13 @@ import de.unirostock.sems.masymos.query.types.PublicationQuery;
 import de.unirostock.sems.masymos.query.types.SedmlQuery;
 import de.unirostock.sems.masymos.util.ResultSetUtil;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
+
 public class QueryAdapter {
 	
 	private static GraphDatabaseService graphDB = Manager.instance().getDatabase();

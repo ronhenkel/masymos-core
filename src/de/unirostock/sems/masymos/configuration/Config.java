@@ -2,8 +2,11 @@ package de.unirostock.sems.masymos.configuration;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
-
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class Config {	
 
 	private Config(){

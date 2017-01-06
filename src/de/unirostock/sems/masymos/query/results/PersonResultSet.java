@@ -6,6 +6,12 @@ import java.util.List;
 import de.unirostock.sems.masymos.data.PersonWrapper;
 import de.unirostock.sems.masymos.query.IResourceResultSetInterface;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public class PersonResultSet implements IResourceResultSetInterface {
 
 	private float score;

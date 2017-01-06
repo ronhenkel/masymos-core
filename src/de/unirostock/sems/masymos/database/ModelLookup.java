@@ -13,9 +13,11 @@ import org.neo4j.graphdb.Transaction;
 
 import de.unirostock.sems.masymos.configuration.Property;
 
-
-
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class ModelLookup {
 
 	static GraphDatabaseService graphDB =  Manager.instance().getDatabase() ;

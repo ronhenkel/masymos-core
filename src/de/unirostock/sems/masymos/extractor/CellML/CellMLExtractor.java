@@ -43,8 +43,11 @@ import de.unirostock.sems.masymos.extractor.Extractor;
 import de.unirostock.sems.masymos.util.CmetaContainer;
 import de.unirostock.sems.masymos.util.IndexText;
 
-
-
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class CellMLExtractor extends Extractor{
 	
 	final static Logger logger = LoggerFactory.getLogger(CellMLExtractor.class);

@@ -24,6 +24,11 @@ import de.unirostock.sems.masymos.configuration.Property;
 import de.unirostock.sems.masymos.configuration.Relation;
 import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class ModelDeleter {
 	
 	final static Logger logger = LoggerFactory.getLogger(ModelDeleter.class);

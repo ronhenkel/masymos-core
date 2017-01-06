@@ -9,6 +9,13 @@ import de.unirostock.sems.masymos.database.IdFactory;
 import de.unirostock.sems.masymos.extractor.Extractor;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
+
 public class SBMLExtractorThread  implements Callable<Node> {
 
 	private String filePath;

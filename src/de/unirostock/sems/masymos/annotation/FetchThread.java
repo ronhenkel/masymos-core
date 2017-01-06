@@ -26,6 +26,11 @@ import de.unirostock.sems.masymos.database.Manager;
 import de.unirostock.sems.masymos.database.traverse.DocumentTraverser;
 import de.unirostock.sems.masymos.util.IndexText;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class FetchThread extends Thread {
 	
 	final Logger logger = LoggerFactory.getLogger(FetchThread.class);

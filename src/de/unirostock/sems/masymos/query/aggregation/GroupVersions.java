@@ -1,5 +1,11 @@
 package de.unirostock.sems.masymos.query.aggregation;
 
+/**
+*
+* Copyright 2016 Mariam Nassar (GPL v3)
+* @author Mariam Nassar
+*/
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

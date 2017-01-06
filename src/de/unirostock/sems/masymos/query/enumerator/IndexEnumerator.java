@@ -1,6 +1,12 @@
 package de.unirostock.sems.masymos.query.enumerator;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public enum IndexEnumerator {
 
 	MODELINDEX,

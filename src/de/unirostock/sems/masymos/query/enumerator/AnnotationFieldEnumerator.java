@@ -2,6 +2,12 @@ package de.unirostock.sems.masymos.query.enumerator;
 
 import de.unirostock.sems.masymos.configuration.Property;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
+
 public enum AnnotationFieldEnumerator {
 
 	// annotation index

@@ -3,6 +3,11 @@ package de.unirostock.sems.masymos.util;
 import java.util.List;
 import java.util.Map;
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public final class ModelDataHolder {
 
 	private String fileId;

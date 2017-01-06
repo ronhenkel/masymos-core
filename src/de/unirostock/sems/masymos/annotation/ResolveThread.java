@@ -7,6 +7,11 @@ import org.slf4j.LoggerFactory;
 import uk.ac.ebi.miriam.lib.MiriamLink;
 
 
+/**
+*
+* Copyright 2016 Ron Henkel (GPL v3)
+* @author ronhenkel
+*/
 public class ResolveThread extends Thread {
 	
 	final Logger logger = LoggerFactory.getLogger(ResolveThread.class);
