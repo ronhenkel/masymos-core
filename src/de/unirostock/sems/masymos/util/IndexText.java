@@ -7,6 +7,12 @@ import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Normalize and shrink text blocks before committing to Lucene
+ *
+ * Copyright 2016 Ron Henkel
+ * @author ronhenkel
+ */
 public class IndexText {
 
 	private static int max = 32766;
