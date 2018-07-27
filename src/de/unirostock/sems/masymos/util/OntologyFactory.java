@@ -169,7 +169,9 @@ public class OntologyFactory {
 
 		@Override
 		protected void initialize(Node created, Map<String, Object> properties) {
-			created.setProperty( "id", properties.get( "id" ) );
+			if( properties.containsKey("id") )
+				created.setProperty( "id", properties.get( "id" ) );
+			
 			created.addLabel( Label.label(this.indexName) );
 		}
 		
