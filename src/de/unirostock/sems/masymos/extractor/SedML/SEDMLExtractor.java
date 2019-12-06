@@ -10,6 +10,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jlibsedml.AbstractTask;
 import org.jlibsedml.Curve;
 import org.jlibsedml.DataGenerator;
 import org.jlibsedml.DataSet;
@@ -139,12 +140,12 @@ public class SEDMLExtractor extends Extractor{
 			modelNodes.put(model.getId(), modelNode);
 			
 			//dissolve variables in source property of changed models
-			if (model.hasChanges())
-			{
-				modelNode.setProperty(Property.SEDML.MODELSOURCE, (modelNodes.get(model.getSource())).getProperty(Property.SEDML.MODELSOURCE));
-			} 
-			else modelNode.setProperty(Property.SEDML.MODELSOURCE, model.getSource());
-			
+//			if (model.hasChanges())
+//			{
+//				modelNode.setProperty(Property.SEDML.MODELSOURCE, (modelNodes.get(model.getId())).getProperty(Property.SEDML.MODELSOURCE));
+//			} 
+//			else modelNode.setProperty(Property.SEDML.MODELSOURCE, model.getSource());
+			modelNode.setProperty(Property.SEDML.MODELSOURCE, model.getSource());
 			sedmlIndex.add(sedmlNode, Property.SEDML.MODELSOURCE, modelNode.getProperty(Property.SEDML.MODELSOURCE));
 			sedmlIndex.add(sedmlNode, Property.General.URI, modelNode.getProperty(Property.SEDML.MODELSOURCE));
 		}
@@ -307,12 +308,12 @@ private static Map<String,Node> extractSEDMLDataGenerators(List<DataGenerator> l
 		return datageneratorNodes;
 	}
 
-private static Map<String, Node[]> extractSEDMLTasks(List<Task> listOfTask, Node documentNode, Map<String,Node> modelNodes, Map<String,Node> simulationNodes, Long uID){
+private static Map<String, Node[]> extractSEDMLTasks(List<AbstractTask> listOfTask, Node documentNode, Map<String,Node> modelNodes, Map<String,Node> simulationNodes, Long uID){
 	
 	Map<String,Node[]> tasks = new HashMap<String,Node[]>();
 	
 	
-		for (Task task : listOfTask){
+		for (AbstractTask task : listOfTask){
 		
 			Node simNode = simulationNodes.get(task.getSimulationReference());
 			Node modelNode = modelNodes.get(task.getModelReference());

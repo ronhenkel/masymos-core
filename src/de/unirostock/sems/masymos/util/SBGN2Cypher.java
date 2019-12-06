@@ -8,13 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.sbgn.SbgnUtil;
-import org.sbgn.bindings.Arc;
-import org.sbgn.bindings.Glyph;
-import org.sbgn.bindings.Map;
-import org.sbgn.bindings.Port;
-import org.sbgn.bindings.Sbgn;
-
 import de.unirostock.sems.masymos.configuration.Relation;
 
 /**
@@ -32,7 +25,7 @@ public class SBGN2Cypher  {
 	
 	
 	public static String toCypher(String in) throws Exception{	
-
+/*
 		File f = new File(in);	
 		Sbgn sbgn = SbgnUtil.readFromFile(f);
 		Map map = sbgn.getMap();
@@ -83,8 +76,11 @@ public class SBGN2Cypher  {
 		sb.append("RETURN XXX");
 		
 		return sb.toString();
+		*/
+		return "NOPE";
 	}
 	
+	/*
 	private static Glyph getParentGlyph(Map map, Port p){
 		for (Glyph g : map.getGlyph())
 		{
@@ -96,4 +92,5 @@ public class SBGN2Cypher  {
 		}
 		return null;
 	}
+	*/
 }
